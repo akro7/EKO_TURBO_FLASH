@@ -61,16 +61,10 @@ jobs:
           Write-Host "Warning: ekoflash.exe not found. EKO Flash mode disabled."
         }
 
-    - name: Download Zadig
-      shell: pwsh
-      run: |
-        Invoke-WebRequest "https://github.com/pbatard/libwdi/releases/download/v1.5.1/zadig-2.9.exe" -OutFile "core\zadig.exe"
-        Write-Host "zadig.exe: $((Get-Item 'core\zadig.exe').Length) bytes"
-
     - name: Verify core tools
       shell: pwsh
       run: |
-        $required = @("core\adb.exe","core\fastboot.exe","core\libusb-1.0.dll","core\zadig.exe")
+        $required = @("core\adb.exe","core\fastboot.exe","core\libusb-1.0.dll")
         $optional = @("core\ekoflash.exe")
         $ok = $true
         foreach ($f in $required) {
