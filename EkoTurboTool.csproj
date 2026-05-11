@@ -15,6 +15,11 @@
     <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
   </PropertyGroup>
 
+  <!-- NuGet Packages -->
+  <ItemGroup>
+    <PackageReference Include="SharpZipLib" Version="1.4.2" />
+  </ItemGroup>
+
   <!-- EKO TURBO -->
   <ItemGroup>
     <None Update="core\**\*">
