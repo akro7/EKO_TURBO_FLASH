@@ -16,7 +16,7 @@ namespace EkoTurboTool
     public partial class MainWindow : Window
     {
         private enum FlashMode { Fastboot, EkoFlash, Sideload, Tools, BackupRestore }
-        private enum EkoBackend { None, EkoFlash, ZadigOnly }
+        private enum EkoBackend { None, EkoFlash }
 
         private FlashMode _mode = FlashMode.Fastboot;
         private EkoBackend _ekoBackend = EkoBackend.None;
@@ -35,7 +35,6 @@ namespace EkoTurboTool
         private string AdbPath => Path.Combine(CorePath, "adb.exe");
         private string FastbootPath => Path.Combine(CorePath, "fastboot.exe");
         private string EkoFlashPath => Path.Combine(CorePath, "ekoflash.exe");
-        private string ZadigPath => Path.Combine(CorePath, "zadig.exe");
 
         public MainWindow()
         {
@@ -57,7 +56,6 @@ namespace EkoTurboTool
             AppendLog($"adb         : {(File.Exists(AdbPath) ? "✓ ready" : "✗ missing")}");
             AppendLog($"fastboot    : {(File.Exists(FastbootPath) ? "✓ ready" : "✗ missing")}");
             AppendLog($"ekoflash    : {(File.Exists(EkoFlashPath) ? "✓ ready" : "✗ missing")}");
-            AppendLog($"zadig       : {(File.Exists(ZadigPath) ? "✓ ready" : "✗ missing")}");
         }
 
         // Optional controls (so build passes even if backup UI not in XAML yet)
@@ -303,27 +301,10 @@ namespace EkoTurboTool
                     return (true, "DOWNLOAD MODE (EKO FLASH)", "ekoflash: device detected in download mode.");
                 }
 
-                bool driverErr = full.Contains("libusb error") || full.Contains("failed to access") || full.Contains("no device");
-                bool samUsb = await SamsungUsbPresentAsync();
-                if (samUsb || driverErr)
-                {
-                    _ekoBackend = EkoBackend.ZadigOnly;
-                    return (true, "DOWNLOAD MODE (ZADIG NEEDED)",
-                        "Samsung USB found but ekoflash cannot open device (libusb error).\nGo to ADB/TOOLS tab → Launch Zadig → install WinUSB driver → re-detect.");
-                }
-
                 return (false, "NO DOWNLOAD DEVICE", "ekoflash: no device found in download mode.");
             }
 
-            bool sam = await SamsungUsbPresentAsync();
-            if (sam) { _ekoBackend = EkoBackend.ZadigOnly; return (true, "DOWNLOAD MODE (DRIVER ONLY)", "Samsung USB detected. ekoflash.exe not found in core."); }
-            return (false, "NO DOWNLOAD DEVICE", "No download-mode device detected.");
-        }
-
-        private async Task<bool> SamsungUsbPresentAsync()
-        {
-            var r = await RunProcessAsync("pnputil.exe", "/enum-devices /connected", 12000);
-            return (r.Out + r.Err).ToUpper().Contains("VID_04E8");
+            return (false, "NO DOWNLOAD DEVICE", "No download-mode device detected. ekoflash.exe not found in core.");
         }
 
         // Flash handlers
@@ -405,22 +386,6 @@ namespace EkoTurboTool
         {
             if (!_deviceChecked) { AppendLog("Detect device first."); return; }
             if (!_deviceConnected) { AppendLog("Device not connected."); return; }
-
-            if (_ekoBackend == EkoBackend.ZadigOnly)
-            {
-                AppendLog("══════════════════════════════════════════");
-                AppendLog("  libusb error — WinUSB driver needed");
-                AppendLog("══════════════════════════════════════════");
-                AppendLog("  1. Go to ADB/TOOLS tab → Launch Zadig");
-                AppendLog("  2. Options → List All Devices");
-                AppendLog("  3. Select: SAMSUNG Mobile USB Composite Device");
-                AppendLog("  4. Choose WinUSB → Install Driver");
-                AppendLog("  5. Reconnect device → Detect Device again");
-                AppendLog("══════════════════════════════════════════");
-                if (File.Exists(ZadigPath)) { AppendLog("  Launching Zadig now..."); LaunchZadigInternal(); }
-                return;
-            }
-
             if (_ekoBackend != EkoBackend.EkoFlash) { AppendLog("ekoflash not ready. Press Detect Device."); return; }
 
             int total = rows.Count;
@@ -457,11 +422,6 @@ namespace EkoTurboTool
                     AppendLog($"[{row.Label}] FAILED (exit {r.Code})");
                     if (!string.IsNullOrWhiteSpace(r.Out)) AppendLog(r.Out.Trim());
                     if (!string.IsNullOrWhiteSpace(r.Err)) AppendLog(r.Err.Trim());
-                    if ((r.Out + r.Err).ToLower().Contains("libusb error"))
-                    {
-                        AppendLog("  ↳ libusb error detected! Go to ADB/TOOLS → Launch Zadig.");
-                        _ekoBackend = EkoBackend.ZadigOnly;
-                    }
                     return;
                 }
 
@@ -558,17 +518,6 @@ namespace EkoTurboTool
             if (!string.IsNullOrWhiteSpace(r.Out)) AppendLog(r.Out.TrimEnd());
             if (!string.IsNullOrWhiteSpace(r.Err)) AppendLog(r.Err.TrimEnd());
             AppendLog(r.Code == 0 ? "APK installed ✓" : "APK install FAILED.");
-        }
-
-        // Zadig
-        private void LaunchZadig_Click(object s, RoutedEventArgs e) => LaunchZadigInternal();
-
-        private void LaunchZadigInternal()
-        {
-            if (!File.Exists(ZadigPath)) { AppendLog("zadig.exe not found in core folder."); return; }
-            AppendLog($"Launching Zadig: {ZadigPath}");
-            try { Process.Start(new ProcessStartInfo(ZadigPath) { UseShellExecute = true }); }
-            catch (Exception ex) { AppendLog($"Launch failed: {ex.Message}"); }
         }
 
         // Wipe / Reboot / Reset
