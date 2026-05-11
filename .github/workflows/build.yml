@@ -37,7 +37,7 @@ jobs:
         Write-Host "adb.exe:      $((Get-Item 'core\adb.exe').Length) bytes"
         Write-Host "fastboot.exe: $((Get-Item 'core\fastboot.exe').Length) bytes"
 
-    # 2) libusb-1.0.dll (x64) – required for ekoflash
+    # 2) libusb-1.0.dll (x64)
     - name: Download libusb x64
       shell: pwsh
       run: |
@@ -59,14 +59,14 @@ jobs:
         Copy-Item $dll.FullName "core\libusb-1.0.dll" -Force
         Write-Host "libusb-1.0.dll: $($dll.Length) bytes (x64)"
 
-    # 3) ekoflash.exe – must exist in repository under core/ (manual upload)
+    # 3) ekoflash.exe check
     - name: Check ekoflash.exe
       shell: pwsh
       run: |
         if (Test-Path "core\ekoflash.exe") {
           Write-Host "ekoflash.exe found: $((Get-Item 'core\ekoflash.exe').Length) bytes"
         } else {
-          Write-Host "⚠️ Warning: ekoflash.exe not found in core/. EKO Flash mode will be disabled."
+          Write-Host "Warning: ekoflash.exe not found in core/. EKO Flash mode will be disabled."
         }
 
     # 4) Zadig
@@ -76,7 +76,7 @@ jobs:
         Invoke-WebRequest "https://github.com/pbatard/libwdi/releases/download/v1.5.1/zadig-2.9.exe" -OutFile "core\zadig.exe"
         Write-Host "zadig.exe: $((Get-Item 'core\zadig.exe').Length) bytes"
 
-    # 5) Verify core files (minimum required)
+    # 5) Verify core files
     - name: Verify core tools
       shell: pwsh
       run: |
@@ -86,9 +86,7 @@ jobs:
           "core\libusb-1.0.dll",
           "core\zadig.exe"
         )
-        $optional = @(
-          "core\ekoflash.exe"
-        )
+        $optional = @("core\ekoflash.exe")
         $ok = $true
         foreach ($f in $required) {
           if (Test-Path $f) { Write-Host "[OK] $f  ($((Get-Item $f).Length) bytes)" }
@@ -100,11 +98,15 @@ jobs:
         }
         if (-not $ok) { exit 1 }
 
-    # 6) Restore NuGet packages
+    # 6) FIX: Add missing ICSharpCode.AvalonEdit NuGet package
+    - name: Add AvalonEdit package
+      run: dotnet add EkoTurboTool.csproj package AvalonEdit
+
+    # 7) Restore NuGet packages
     - name: Restore
       run: dotnet restore EkoTurboTool.csproj
 
-    # 7) Publish single-file EXE and copy core folder
+    # 8) Publish single-file EXE
     - name: Publish
       shell: pwsh
       run: |
@@ -118,7 +120,6 @@ jobs:
           throw "Publish completed but EkoTurboTool.exe not found."
         }
 
-        # Copy core folder to publish directory
         Copy-Item -Path "core" -Destination "publish\" -Recurse -Force
 
         $exe = Get-Item "publish\EkoTurboTool.exe"
@@ -127,14 +128,14 @@ jobs:
         Write-Host "Contents of publish\core:"
         Get-ChildItem publish\core | Select-Object Name, Length
 
-    # 8) Create ZIP package (EXE + core folder)
+    # 9) Create ZIP package
     - name: Create ZIP package
       shell: pwsh
       run: |
         Compress-Archive -Path "publish\*" -DestinationPath "EkoTurboTool.zip" -Force
         Write-Host "ZIP package created: EkoTurboTool.zip"
 
-    # 9) Upload artifact (ZIP file)
+    # 10) Upload artifact
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
@@ -143,7 +144,7 @@ jobs:
         if-no-files-found: error
         retention-days: 14
 
-    # 10) GitHub Release (on tag push)
+    # 11) GitHub Release (on tag push)
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v2
