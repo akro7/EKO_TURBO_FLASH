@@ -1,0 +1,593 @@
+<Window x:Class="EkoTurboTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="EKO TURBO"
+        Width="1340" Height="860"
+        MinWidth="1100" MinHeight="700"
+        WindowStartupLocation="CenterScreen"
+        Background="#08101E" Foreground="#EAF4FF"
+        FontFamily="Segoe UI"
+>
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="MainBgBrush"     Color="#08101E"/>
+        <SolidColorBrush x:Key="PanelBrush"      Color="#3A0D1B33"/>
+        <SolidColorBrush x:Key="BorderBrush"     Color="#4C52BFFF"/>
+        <SolidColorBrush x:Key="AccentBrush"     Color="#37CFFF"/>
+        <SolidColorBrush x:Key="AccentSoftBrush" Color="#7A35CFFF"/>
+        <SolidColorBrush x:Key="DangerBrush"     Color="#5AFF4C78"/>
+        <SolidColorBrush x:Key="SuccessBrush"    Color="#5A1CE17A"/>
+        <SolidColorBrush x:Key="WarningBrush"    Color="#FFC857"/>
+        <SolidColorBrush x:Key="TextMutedBrush"  Color="#9CC7E8"/>
+
+        <Style x:Key="GlassPanel" TargetType="Border">
+            <Setter Property="Background"      Value="{DynamicResource PanelBrush}"/>
+            <Setter Property="BorderBrush"     Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius"    Value="13"/>
+            <Setter Property="Padding"         Value="12"/>
+        </Style>
+
+        <Style x:Key="ModeButton" TargetType="Button">
+            <Setter Property="Foreground"      Value="#D6E9FF"/>
+            <Setter Property="Background"      Value="#2D18253D"/>
+            <Setter Property="BorderBrush"     Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding"         Value="14,7"/>
+            <Setter Property="Margin"          Value="0,0,7,0"/>
+            <Setter Property="FontWeight"      Value="SemiBold"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="10" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2,0"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PathBox" TargetType="TextBox">
+            <Setter Property="Background"              Value="#2C132443"/>
+            <Setter Property="BorderBrush"             Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness"         Value="1"/>
+            <Setter Property="Foreground"              Value="#EAF4FF"/>
+            <Setter Property="Padding"                 Value="7,5"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="BrowseBtn" TargetType="Button">
+            <Setter Property="Background"      Value="#36FFFFFF"/>
+            <Setter Property="BorderBrush"     Value="#66FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground"      Value="#F4FAFF"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="8" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FlashBtn" TargetType="Button">
+            <Setter Property="Background"      Value="{DynamicResource AccentSoftBrush}"/>
+            <Setter Property="BorderBrush"     Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground"      Value="#E9F7FF"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="8" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding"         Value="14,7"/>
+            <Setter Property="FontWeight"      Value="Bold"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="10" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CmdBtn" TargetType="Button">
+            <Setter Property="Background"      Value="#221A3050"/>
+            <Setter Property="BorderBrush"     Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground"      Value="#C8E8FF"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Padding"         Value="9,4"/>
+            <Setter Property="Margin"          Value="0,0,5,5"/>
+            <Setter Property="FontSize"        Value="11"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="7" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SwatchBtn" TargetType="Button">
+            <Setter Property="Width"  Value="26"/><Setter Property="Height" Value="26"/>
+            <Setter Property="Margin" Value="4,0,0,0"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="13" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="OdinCheck" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#C8E8FF"/><Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,6"/><Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="TabBtn" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+            <Setter Property="Padding" Value="12,5"/><Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="{DynamicResource MainBgBrush}">
+        <Canvas IsHitTestVisible="False">
+            <Ellipse Canvas.Left="-130" Canvas.Top="-100" Width="400" Height="400" Fill="#2025BCFF">
+                <Ellipse.Effect><BlurEffect Radius="110"/></Ellipse.Effect>
+            </Ellipse>
+            <Ellipse Canvas.Right="-130" Canvas.Bottom="-110" Width="380" Height="380" Fill="#1C1E74FF">
+                <Ellipse.Effect><BlurEffect Radius="120"/></Ellipse.Effect>
+            </Ellipse>
+        </Canvas>
+
+        <Border Margin="12" Style="{StaticResource GlassPanel}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="175"/>
+                </Grid.RowDefinitions>
+
+                <!-- HEADER -->
+                <Grid Grid.Row="0" Margin="4,2,4,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Width="66" Height="66" Margin="0,0,14,0">
+                        <Ellipse Fill="#3037CFFF"><Ellipse.Effect><BlurEffect Radius="11"/></Ellipse.Effect></Ellipse>
+                        <Ellipse Fill="#1A1E3A55" Stroke="{DynamicResource AccentBrush}" StrokeThickness="2"/>
+                        <Ellipse Margin="8" Fill="#D00D1829"/>
+                        <Ellipse Margin="15" Fill="Transparent" Stroke="{DynamicResource AccentBrush}" StrokeThickness="0.7" Opacity="0.4"/>
+                        <TextBlock Text="ET" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" FontSize="21"/>
+                    </Grid>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="EKO TURBO" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
+                        <TextBlock Text="Fastboot  |  EKO Flash  |  ADB / Sideload  |  Tools"
+                                   Foreground="{DynamicResource TextMutedBrush}" FontSize="13" Margin="2,2,0,0"/>
+                        <TextBlock Text="by @EkoTeam" Foreground="#5A8BAA" FontSize="11" Margin="2,1,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Theme" Foreground="#6AACCF" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <Button x:Name="SwatchBlue" Style="{StaticResource SwatchBtn}" Background="#37CFFF" BorderBrush="#AAEEFF" Tag="Blue" Click="Swatch_Click" ToolTip="Blue"/>
+                        <Button x:Name="SwatchPurple" Style="{StaticResource SwatchBtn}" Background="#B67BFF" BorderBrush="#DDB6FF" Tag="Purple" Click="Swatch_Click" ToolTip="Purple"/>
+                        <Button x:Name="SwatchEmerald" Style="{StaticResource SwatchBtn}" Background="#43F2C2" BorderBrush="#A0FFE8" Tag="Emerald" Click="Swatch_Click" ToolTip="Emerald"/>
+                        <Button x:Name="SwatchCrimson" Style="{StaticResource SwatchBtn}" Background="#FF6DA8" BorderBrush="#FFAACC" Tag="Crimson" Click="Swatch_Click" ToolTip="Crimson"/>
+                        <Button x:Name="SwatchGold" Style="{StaticResource SwatchBtn}" Background="#FFB830" BorderBrush="#FFD880" Tag="Gold" Click="Swatch_Click" ToolTip="Gold"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- MODE BAR -->
+                <Grid Grid.Row="1" Margin="4,0,4,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="FastbootBtn" Style="{StaticResource ModeButton}" Width="155" Height="34" Content="FASTBOOT MODE" Click="FastbootMode_Click"/>
+                        <Button x:Name="EkoFlashBtn" Style="{StaticResource ModeButton}" Width="135" Height="34" Content="EKO FLASH MODE" Click="EkoFlashMode_Click"/>
+                        <Button x:Name="SideloadBtn" Style="{StaticResource ModeButton}" Width="150" Height="34" Content="ADB SIDELOAD" Click="SideloadMode_Click"/>
+                        <Button x:Name="ToolsBtn" Style="{StaticResource ModeButton}" Width="135" Height="34" Content="ADB / TOOLS" Click="ToolsMode_Click"/>
+                    </StackPanel>
+                    <Border Grid.Column="2" Style="{StaticResource GlassPanel}" Padding="12,6" Margin="10,0,0,0">
+                        <DockPanel LastChildFill="False">
+                            <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                                <TextBlock Text="DEVICE STATUS" Foreground="#7ABFE0" FontWeight="SemiBold" FontSize="11"/>
+                                <TextBlock x:Name="DeviceStatusText" Text="Not checked"
+                                           Foreground="{DynamicResource WarningBrush}" FontWeight="Bold" FontSize="13"/>
+                            </StackPanel>
+                            <Button DockPanel.Dock="Right" Width="130" Height="31" Margin="16,0,0,0"
+                                    Content="Detect Device"
+                                    Background="{DynamicResource AccentSoftBrush}"
+                                    BorderBrush="{DynamicResource AccentBrush}"
+                                    Foreground="#EFFFFF" Style="{StaticResource ActionButton}"
+                                    Click="DetectDevice_Click"/>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+
+                <!-- MAIN CONTENT -->
+                <Grid Grid.Row="2" Margin="4,0,4,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="280"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- LEFT panel -->
+                    <Border Style="{StaticResource GlassPanel}">
+                        <Grid>
+
+                            <!-- FASTBOOT -->
+                            <Grid x:Name="PanelFastboot">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="PARTITION FLASHING" FontSize="19" FontWeight="Bold"
+                                           Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl x:Name="RowsList">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,0,0,7">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="100"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="82"/>
+                                                        <ColumnDefinition Width="68"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Label}" VerticalAlignment="Center"
+                                                               Foreground="#B2DFFF" FontWeight="SemiBold" FontSize="12"/>
+                                                    <TextBox Grid.Column="1" Style="{StaticResource PathBox}"
+                                                             Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    <Button Grid.Column="2" Margin="5,0,5,0" Content="Browse"
+                                                            Tag="{Binding Key}" Style="{StaticResource BrowseBtn}" Click="Browse_Click"/>
+                                                    <Button Grid.Column="3" Content="Flash"
+                                                            Tag="{Binding Key}" Style="{StaticResource FlashBtn}" Click="FlashOne_Click"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </Grid>
+
+                            <!-- EKO FLASH (formerly Odin) -->
+                            <Grid x:Name="PanelEkoFlash" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="EKO FLASH FILES" FontSize="19" FontWeight="Bold"
+                                           Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                                <Grid Grid.Row="1" x:Name="PitRow" Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="82"/>
+                                        <ColumnDefinition Width="68"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="PIT" VerticalAlignment="Center" Foreground="#FFD580" FontWeight="Bold"/>
+                                    <TextBox x:Name="PitPathBox" Grid.Column="1" Style="{StaticResource PathBox}" IsReadOnly="True"/>
+                                    <Button Grid.Column="2" Margin="5,0,5,0" Content="Browse"
+                                            Style="{StaticResource BrowseBtn}" Click="BrowsePit_Click"/>
+                                    <Button Grid.Column="3" Content="Clear"
+                                            Style="{StaticResource BrowseBtn}" Click="ClearPit_Click"/>
+                                </Grid>
+                                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl x:Name="EkoFlashRowsList">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,0,0,7">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="100"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="82"/>
+                                                        <ColumnDefinition Width="68"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Label}" VerticalAlignment="Center"
+                                                               Foreground="#B2DFFF" FontWeight="SemiBold" FontSize="12"/>
+                                                    <TextBox Grid.Column="1" Style="{StaticResource PathBox}"
+                                                             Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    <Button Grid.Column="2" Margin="5,0,5,0" Content="Browse"
+                                                            Tag="{Binding Key}" Style="{StaticResource BrowseBtn}" Click="BrowseEkoFlash_Click"/>
+                                                    <Button Grid.Column="3" Content="Flash"
+                                                            Tag="{Binding Key}" Style="{StaticResource FlashBtn}" Click="FlashOneEkoFlash_Click"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </Grid>
+
+                            <!-- SIDELOAD -->
+                            <Grid x:Name="PanelSideload" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="ADB SIDELOAD" FontSize="19" FontWeight="Bold"
+                                           Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                                <Grid Grid.Row="1" Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="82"/>
+                                        <ColumnDefinition Width="130"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="OTA ZIP" VerticalAlignment="Center" Foreground="#B2DFFF" FontWeight="SemiBold" FontSize="12"/>
+                                    <TextBox x:Name="SideloadPathBox" Grid.Column="1" Style="{StaticResource PathBox}" IsReadOnly="True"/>
+                                    <Button Grid.Column="2" Margin="5,0,5,0" Content="Browse"
+                                            Style="{StaticResource BrowseBtn}" Click="BrowseSideload_Click"/>
+                                    <Button Grid.Column="3" Content="Start Sideload"
+                                            Style="{StaticResource FlashBtn}" Click="StartSideload_Click"/>
+                                </Grid>
+                                <Border Grid.Row="2" Padding="8,7" Background="#1A1A2E40"
+                                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="9">
+                                    <StackPanel>
+                                        <TextBlock Text="ADB QUICK COMMANDS" FontSize="11" FontWeight="Bold"
+                                                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,5"/>
+                                        <WrapPanel>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb devices" Tag="adb devices" Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb reboot" Tag="adb reboot" Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb reboot recovery" Tag="adb reboot recovery" Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb reboot bootloader" Tag="adb reboot bootloader" Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb reboot sideload" Tag="adb reboot sideload" Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb get-state" Tag="adb get-state" Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb shell getprop" Tag="adb shell getprop ro.product.model" Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb shell getprop sdk" Tag="adb shell getprop ro.build.version.sdk" Click="QuickCmd_Click"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- TOOLS -->
+                            <Grid x:Name="PanelTools" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Text="ADB / FASTBOOT TOOLS" FontSize="19" FontWeight="Bold"
+                                           Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,10"/>
+
+                                <Border Grid.Row="1" Padding="8,7" Margin="0,0,0,8"
+                                        Background="#1A1A2E40" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" CornerRadius="9">
+                                    <StackPanel>
+                                        <TextBlock Text="CUSTOM ADB COMMAND" FontSize="11" FontWeight="Bold"
+                                                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,5"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="65"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="adb " Foreground="#6AACCF" VerticalAlignment="Center"
+                                                       FontFamily="Consolas" FontSize="12" Margin="0,0,4,0"/>
+                                            <TextBox x:Name="CustomAdbBox" Grid.Column="1" Style="{StaticResource PathBox}"
+                                                     FontFamily="Consolas" FontSize="12" ToolTip="e.g. shell getprop ro.product.model"/>
+                                            <Button Grid.Column="2" Margin="5,0,0,0" Content="Run"
+                                                    Style="{StaticResource FlashBtn}" Click="RunCustomAdb_Click"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Row="2" Padding="8,7" Margin="0,0,0,8"
+                                        Background="#1A1A2E40" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" CornerRadius="9">
+                                    <StackPanel>
+                                        <TextBlock Text="CUSTOM FASTBOOT COMMAND" FontSize="11" FontWeight="Bold"
+                                                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,5"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="65"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="fastboot " Foreground="#6AACCF" VerticalAlignment="Center"
+                                                       FontFamily="Consolas" FontSize="12" Margin="0,0,4,0"/>
+                                            <TextBox x:Name="CustomFastbootBox" Grid.Column="1" Style="{StaticResource PathBox}"
+                                                     FontFamily="Consolas" FontSize="12" ToolTip="e.g. getvar product"/>
+                                            <Button Grid.Column="2" Margin="5,0,0,0" Content="Run"
+                                                    Style="{StaticResource FlashBtn}" Click="RunCustomFastboot_Click"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Row="3" Padding="8,7" Margin="0,0,0,8"
+                                        Background="#1A1A2E40" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" CornerRadius="9">
+                                    <StackPanel>
+                                        <TextBlock Text="ADB INSTALL APK" FontSize="11" FontWeight="Bold"
+                                                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,5"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="82"/>
+                                                <ColumnDefinition Width="82"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox x:Name="ApkPathBox" Style="{StaticResource PathBox}" IsReadOnly="True"/>
+                                            <Button Grid.Column="1" Margin="5,0,5,0" Content="Browse APK"
+                                                    Style="{StaticResource BrowseBtn}" Click="BrowseApk_Click"/>
+                                            <Button Grid.Column="2" Content="Install"
+                                                    Style="{StaticResource FlashBtn}" Click="InstallApk_Click"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Row="4" Padding="8,7"
+                                        Background="#1A1A2E40" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" CornerRadius="9">
+                                    <StackPanel>
+                                        <TextBlock Text="DRIVER TOOLS" FontSize="11" FontWeight="Bold"
+                                                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,7"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="Launch Zadig (WinUSB driver)" Width="230" Height="32"
+                                                    Background="#3A22447A" BorderBrush="#66AADDFF"
+                                                    Foreground="#C8E8FF" Style="{StaticResource ActionButton}"
+                                                    Click="LaunchZadig_Click"/>
+                                            <TextBlock Text="  ← fixes libusb error for ekoflash"
+                                                       Foreground="#6AACCF" FontSize="11" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- RIGHT: tabs -->
+                    <Border Grid.Column="1" Margin="10,0,0,0" Style="{StaticResource GlassPanel}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <Button x:Name="TabCmdBtn" Style="{StaticResource TabBtn}" Content="Command" Click="TabCmd_Click"/>
+                                <Button x:Name="TabOptionsBtn" Style="{StaticResource TabBtn}" Content="Options" Click="TabOptions_Click"/>
+                            </StackPanel>
+
+                            <Grid x:Name="TabCmdPanel" Grid.Row="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="COMMAND PREVIEW" FontSize="13" FontWeight="Bold"
+                                           Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,6"/>
+                                <TextBox x:Name="CommandPreviewBox" Grid.Row="1" IsReadOnly="True" TextWrapping="Wrap"
+                                         VerticalScrollBarVisibility="Auto" Background="#2A12223D"
+                                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                         Foreground="#E8F5FF" FontFamily="Consolas" FontSize="11" Padding="8"/>
+                            </Grid>
+
+                            <Grid x:Name="TabOptionsPanel" Grid.Row="1" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="EKO FLASH OPTIONS" FontSize="13" FontWeight="Bold"
+                                           Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,10"/>
+                                <StackPanel Grid.Row="1" Margin="4,0,0,0">
+                                    <CheckBox x:Name="OptAutoReboot" Style="{StaticResource OdinCheck}" Content="Auto Reboot" IsChecked="True"/>
+                                    <CheckBox x:Name="OptNandErase" Style="{StaticResource OdinCheck}" Content="Nand Erase"/>
+                                    <CheckBox x:Name="OptRePartition" Style="{StaticResource OdinCheck}" Content="Re-Partition"/>
+                                    <CheckBox x:Name="OptFResetTime" Style="{StaticResource OdinCheck}" Content="F. Reset Time" IsChecked="True"/>
+                                    <CheckBox x:Name="OptDeviceInfo" Style="{StaticResource OdinCheck}" Content="Device Info"/>
+                                    <CheckBox x:Name="OptFlashLock" Style="{StaticResource OdinCheck}" Content="Flash Lock"/>
+                                    <CheckBox x:Name="OptDecompressData" Style="{StaticResource OdinCheck}" Content="Decompress Data"/>
+                                    <Separator Margin="0,8,0,8" Background="#33FFFFFF"/>
+                                    <TextBlock Text="NOTE" FontSize="10" FontWeight="Bold" Foreground="#FFB830" Margin="0,0,0,4"/>
+                                    <TextBlock TextWrapping="Wrap" FontSize="10" Foreground="#8AACCF"
+                                               Text="Re-Partition requires a PIT file. Options are applied to ekoflash commands where supported."/>
+                                    <Separator Margin="0,8,0,8" Background="#33FFFFFF"/>
+                                    <TextBlock Text="ZADIG HELP" FontSize="10" FontWeight="Bold" Foreground="#FFB830" Margin="0,0,0,4"/>
+                                    <TextBlock TextWrapping="Wrap" FontSize="10" Foreground="#8AACCF"
+                                               Text="If you get libusb error, go to ADB/TOOLS tab and launch Zadig to install WinUSB driver for your device."/>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- ACTION BAR -->
+                <Grid Grid.Row="3" Margin="4,8,4,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <WrapPanel>
+                        <Button Content="START FLASHING" Width="165" Height="34" Margin="0,0,7,0"
+                                Background="{DynamicResource SuccessBrush}" BorderBrush="#881CE17A"
+                                Foreground="#EFFFF7" Style="{StaticResource ActionButton}" Click="StartFlashing_Click"/>
+                        <Button Content="WIPE DATA"      Width="112" Height="34" Margin="0,0,7,0"
+                                Background="{DynamicResource DangerBrush}" BorderBrush="#88FF4C78"
+                                Foreground="#FFF3F7" Style="{StaticResource ActionButton}" Click="WipeData_Click"/>
+                        <Button Content="REBOOT SYSTEM"  Width="138" Height="34" Margin="0,0,7,0"
+                                Background="#5A27CCFF" BorderBrush="#8827CCFF"
+                                Foreground="#EDFAFF" Style="{StaticResource ActionButton}" Click="RebootSystem_Click"/>
+                        <Button Content="RESET ALL"      Width="105" Height="34"
+                                Background="#5A2E3340" BorderBrush="#887D8AA4"
+                                Foreground="#E4F0FF" Style="{StaticResource ActionButton}" Click="ResetAll_Click"/>
+                    </WrapPanel>
+                    <CheckBox x:Name="AutoRebootCheck" Grid.Column="1" VerticalAlignment="Center"
+                              Margin="12,0,0,0" Content="Auto reboot after flash" Foreground="#B7D9F6"/>
+                </Grid>
+
+                <!-- LOG -->
+                <Border Grid.Row="4" Margin="4,0,4,2" Style="{StaticResource GlassPanel}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="OPERATION LOG" FontSize="13" FontWeight="Bold"
+                                   Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,5"/>
+                        <TextBox x:Name="LogBox" Grid.Row="1" IsReadOnly="True" TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto" Background="#28111F38"
+                                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                 Foreground="#E8F5FF" FontFamily="Consolas" FontSize="11" Padding="8"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

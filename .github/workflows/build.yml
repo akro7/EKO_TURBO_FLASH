@@ -1,0 +1,154 @@
+name: Build EkoTurboTool
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+      - '*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    # 1) platform-tools (adb + fastboot)
+    - name: Download platform-tools
+      shell: pwsh
+      run: |
+        New-Item -Force -ItemType Directory "core" | Out-Null
+        Invoke-WebRequest "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -OutFile pt.zip
+        Expand-Archive pt.zip pt-tmp -Force
+        $src = (Get-ChildItem pt-tmp -Recurse -Filter adb.exe | Select-Object -First 1).DirectoryName
+        Copy-Item "$src\*" "core\" -Force
+        Write-Host "adb.exe:      $((Get-Item 'core\adb.exe').Length) bytes"
+        Write-Host "fastboot.exe: $((Get-Item 'core\fastboot.exe').Length) bytes"
+
+    # 2) libusb-1.0.dll (x64) – required for ekoflash
+    - name: Download libusb x64
+      shell: pwsh
+      run: |
+        Invoke-WebRequest "https://github.com/libusb/libusb/releases/download/v1.0.29/libusb-1.0.29.7z" -OutFile libusb.7z
+        7z x libusb.7z -olibusb-tmp -y | Out-Null
+
+        $dll = Get-ChildItem libusb-tmp -Recurse -Filter "libusb-1.0.dll" |
+               Where-Object { $_.FullName -match "MS64|x64|mingw64" } |
+               Select-Object -First 1
+
+        if (-not $dll) {
+          $dll = Get-ChildItem libusb-tmp -Recurse -Filter "libusb-1.0.dll" |
+                 Sort-Object Length -Descending |
+                 Select-Object -First 1
+        }
+
+        if (-not $dll) { throw "libusb-1.0.dll not found in archive." }
+
+        Copy-Item $dll.FullName "core\libusb-1.0.dll" -Force
+        Write-Host "libusb-1.0.dll: $($dll.Length) bytes (x64)"
+
+    # 3) ekoflash.exe – must exist in repository under core/ (manual upload)
+    - name: Check ekoflash.exe
+      shell: pwsh
+      run: |
+        if (Test-Path "core\ekoflash.exe") {
+          Write-Host "ekoflash.exe found: $((Get-Item 'core\ekoflash.exe').Length) bytes"
+        } else {
+          Write-Host "⚠️ Warning: ekoflash.exe not found in core/. EKO Flash mode will be disabled."
+        }
+
+    # 4) Zadig
+    - name: Download Zadig
+      shell: pwsh
+      run: |
+        Invoke-WebRequest "https://github.com/pbatard/libwdi/releases/download/v1.5.1/zadig-2.9.exe" -OutFile "core\zadig.exe"
+        Write-Host "zadig.exe: $((Get-Item 'core\zadig.exe').Length) bytes"
+
+    # 5) Verify core files (minimum required)
+    - name: Verify core tools
+      shell: pwsh
+      run: |
+        $required = @(
+          "core\adb.exe",
+          "core\fastboot.exe",
+          "core\libusb-1.0.dll",
+          "core\zadig.exe"
+        )
+        $optional = @(
+          "core\ekoflash.exe"
+        )
+        $ok = $true
+        foreach ($f in $required) {
+          if (Test-Path $f) { Write-Host "[OK] $f  ($((Get-Item $f).Length) bytes)" }
+          else { Write-Error "[MISSING] $f"; $ok = $false }
+        }
+        foreach ($f in $optional) {
+          if (Test-Path $f) { Write-Host "[OK] $f (optional)" }
+          else { Write-Host "[WARN] $f not found – EKO Flash mode disabled" }
+        }
+        if (-not $ok) { exit 1 }
+
+    # 6) Restore NuGet packages
+    - name: Restore
+      run: dotnet restore EkoTurboTool.csproj
+
+    # 7) Publish single-file EXE and copy core folder
+    - name: Publish
+      shell: pwsh
+      run: |
+        dotnet publish EkoTurboTool.csproj `
+          -c Release `
+          -r win-x64 `
+          --self-contained true `
+          -o publish\
+
+        if (-not (Test-Path "publish\EkoTurboTool.exe")) {
+          throw "Publish completed but EkoTurboTool.exe not found."
+        }
+
+        # Copy core folder to publish directory
+        Copy-Item -Path "core" -Destination "publish\" -Recurse -Force
+
+        $exe = Get-Item "publish\EkoTurboTool.exe"
+        $mb  = [math]::Round($exe.Length / 1MB, 1)
+        Write-Host "EkoTurboTool.exe: $mb MB"
+        Write-Host "Contents of publish\core:"
+        Get-ChildItem publish\core | Select-Object Name, Length
+
+    # 8) Create ZIP package (EXE + core folder)
+    - name: Create ZIP package
+      shell: pwsh
+      run: |
+        Compress-Archive -Path "publish\*" -DestinationPath "EkoTurboTool.zip" -Force
+        Write-Host "ZIP package created: EkoTurboTool.zip"
+
+    # 9) Upload artifact (ZIP file)
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: EkoTurboTool-win-x64
+        path: EkoTurboTool.zip
+        if-no-files-found: error
+        retention-days: 14
+
+    # 10) GitHub Release (on tag push)
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: EkoTurboTool.zip
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
