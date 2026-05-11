@@ -305,7 +305,7 @@
                                 </ScrollViewer>
                             </Grid>
 
-                            <!-- EKO FLASH (formerly Odin) -->
+                            <!-- EKO FLASH -->
                             <Grid x:Name="PanelEkoFlash" Visibility="Collapsed">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -474,22 +474,6 @@
                                     </StackPanel>
                                 </Border>
 
-                                <Border Grid.Row="4" Padding="8,7"
-                                        Background="#1A1A2E40" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" CornerRadius="9">
-                                    <StackPanel>
-                                        <TextBlock Text="DRIVER TOOLS" FontSize="11" FontWeight="Bold"
-                                                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,7"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Button Content="Launch Zadig (WinUSB driver)" Width="230" Height="32"
-                                                    Background="#3A22447A" BorderBrush="#66AADDFF"
-                                                    Foreground="#C8E8FF" Style="{StaticResource ActionButton}"
-                                                    Click="LaunchZadig_Click"/>
-                                            <TextBlock Text="  ← fixes libusb error for ekoflash"
-                                                       Foreground="#6AACCF" FontSize="11" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
                             </Grid>
                         </Grid>
                     </Border>
@@ -538,10 +522,6 @@
                                     <TextBlock Text="NOTE" FontSize="10" FontWeight="Bold" Foreground="#FFB830" Margin="0,0,0,4"/>
                                     <TextBlock TextWrapping="Wrap" FontSize="10" Foreground="#8AACCF"
                                                Text="Re-Partition requires a PIT file. Options are applied to ekoflash commands where supported."/>
-                                    <Separator Margin="0,8,0,8" Background="#33FFFFFF"/>
-                                    <TextBlock Text="ZADIG HELP" FontSize="10" FontWeight="Bold" Foreground="#FFB830" Margin="0,0,0,4"/>
-                                    <TextBlock TextWrapping="Wrap" FontSize="10" Foreground="#8AACCF"
-                                               Text="If you get libusb error, go to ADB/TOOLS tab and launch Zadig to install WinUSB driver for your device."/>
                                 </StackPanel>
                             </Grid>
                         </Grid>
