@@ -30,7 +30,9 @@ namespace EkoTurboTool
         private string _pitFilePath = "";
         private bool _deviceChecked, _deviceConnected, _uiReady;
 
-        // مسارات الأدوات من مجلد core
+        // Serial الجهاز المتصل (ADB) — يُحفظ بعد Detect ويُستخدم في كل أوامر ADB
+        private string? _connectedSerial;
+
         private string CorePath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "core");
         private string AdbPath => Path.Combine(CorePath, "adb.exe");
         private string FastbootPath => Path.Combine(CorePath, "fastboot.exe");
@@ -58,7 +60,7 @@ namespace EkoTurboTool
             AppendLog($"ekoflash    : {(File.Exists(EkoFlashPath) ? "✓ ready" : "✗ missing")}");
         }
 
-        // Optional controls (so build passes even if backup UI not in XAML yet)
+        // ── Optional control finders ─────────────────────────────────────────
         private ListView? GetBackupAppsList() =>
             FindName("BackupAppsList") as ListView ?? FindName("AppsListView") as ListView;
 
@@ -77,10 +79,10 @@ namespace EkoTurboTool
         private CheckBox? GetBkObbOpt() =>
             FindName("BkOptObb") as CheckBox ?? FindName("BackupObbCheck") as CheckBox;
 
-        private Grid? GetBackupPanel() => FindName("PanelBackupRestore") as Grid;
+        private Grid?   GetBackupPanel()      => FindName("PanelBackupRestore") as Grid;
         private Button? GetBackupModeButton() => FindName("BackupRestoreBtn") as Button;
 
-        // Theme
+        // ── Theme ────────────────────────────────────────────────────────────
         private void Swatch_Click(object s, RoutedEventArgs e)
         {
             if (s is Button b && b.Tag is string n)
@@ -94,85 +96,88 @@ namespace EkoTurboTool
         {
             var T = new Dictionary<string, (Color Ac, Color AS, Color Bo, Color Pa, Color Su, Color Da)>
             {
-                ["Blue"]    =(Color.FromRgb(0x37,0xCF,0xFF),Color.FromArgb(0x7A,0x35,0xCF,0xFF),Color.FromArgb(0x4C,0x52,0xBF,0xFF),Color.FromArgb(0x3A,0x0D,0x1B,0x33),Color.FromArgb(0x5A,0x1C,0xE1,0x7A),Color.FromArgb(0x5A,0xFF,0x4C,0x78)),
-                ["Purple"]  =(Color.FromRgb(0xB6,0x7B,0xFF),Color.FromArgb(0x80,0xA1,0x4D,0xFF),Color.FromArgb(0x4C,0xB1,0x86,0xFF),Color.FromArgb(0x3A,0x17,0x12,0x3A),Color.FromArgb(0x5A,0x38,0xD9,0x9E),Color.FromArgb(0x5A,0xFF,0x5E,0x98)),
-                ["Emerald"] =(Color.FromRgb(0x43,0xF2,0xC2),Color.FromArgb(0x7A,0x16,0xC4,0x98),Color.FromArgb(0x4C,0x5F,0xE4,0xC2),Color.FromArgb(0x3A,0x0A,0x1C,0x1A),Color.FromArgb(0x5A,0x27,0xE8,0x9D),Color.FromArgb(0x5A,0xFF,0x6C,0x85)),
-                ["Crimson"] =(Color.FromRgb(0xFF,0x6D,0xA8),Color.FromArgb(0x7A,0xFF,0x5B,0x93),Color.FromArgb(0x4C,0xFF,0x91,0xC2),Color.FromArgb(0x3A,0x20,0x0E,0x24),Color.FromArgb(0x5A,0x38,0xE0,0x9A),Color.FromArgb(0x5A,0xFF,0x4A,0x72)),
-                ["Gold"]    =(Color.FromRgb(0xFF,0xB8,0x30),Color.FromArgb(0x7A,0xFF,0xA0,0x20),Color.FromArgb(0x55,0xFF,0xC0,0x50),Color.FromArgb(0x38,0x1E,0x14,0x05),Color.FromArgb(0x5A,0x1C,0xE1,0x7A),Color.FromArgb(0x5A,0xFF,0x4C,0x78)),
+                ["Blue"]    = (Color.FromRgb(0x37,0xCF,0xFF), Color.FromArgb(0x7A,0x35,0xCF,0xFF), Color.FromArgb(0x4C,0x52,0xBF,0xFF), Color.FromArgb(0x3A,0x0D,0x1B,0x33), Color.FromArgb(0x5A,0x1C,0xE1,0x7A), Color.FromArgb(0x5A,0xFF,0x4C,0x78)),
+                ["Purple"]  = (Color.FromRgb(0xB6,0x7B,0xFF), Color.FromArgb(0x80,0xA1,0x4D,0xFF), Color.FromArgb(0x4C,0xB1,0x86,0xFF), Color.FromArgb(0x3A,0x17,0x12,0x3A), Color.FromArgb(0x5A,0x38,0xD9,0x9E), Color.FromArgb(0x5A,0xFF,0x5E,0x98)),
+                ["Emerald"] = (Color.FromRgb(0x43,0xF2,0xC2), Color.FromArgb(0x7A,0x16,0xC4,0x98), Color.FromArgb(0x4C,0x5F,0xE4,0xC2), Color.FromArgb(0x3A,0x0A,0x1C,0x1A), Color.FromArgb(0x5A,0x27,0xE8,0x9D), Color.FromArgb(0x5A,0xFF,0x6C,0x85)),
+                ["Crimson"] = (Color.FromRgb(0xFF,0x6D,0xA8), Color.FromArgb(0x7A,0xFF,0x5B,0x93), Color.FromArgb(0x4C,0xFF,0x91,0xC2), Color.FromArgb(0x3A,0x20,0x0E,0x24), Color.FromArgb(0x5A,0x38,0xE0,0x9A), Color.FromArgb(0x5A,0xFF,0x4A,0x72)),
+                ["Gold"]    = (Color.FromRgb(0xFF,0xB8,0x30), Color.FromArgb(0x7A,0xFF,0xA0,0x20), Color.FromArgb(0x55,0xFF,0xC0,0x50), Color.FromArgb(0x38,0x1E,0x14,0x05), Color.FromArgb(0x5A,0x1C,0xE1,0x7A), Color.FromArgb(0x5A,0xFF,0x4C,0x78)),
             };
+
             if (!T.TryGetValue(theme, out var t)) return;
 
-            Resources["AccentBrush"] = new SolidColorBrush(t.Ac);
+            Resources["AccentBrush"]     = new SolidColorBrush(t.Ac);
             Resources["AccentSoftBrush"] = new SolidColorBrush(t.AS);
-            Resources["BorderBrush"] = new SolidColorBrush(t.Bo);
-            Resources["PanelBrush"] = new SolidColorBrush(t.Pa);
-            Resources["SuccessBrush"] = new SolidColorBrush(t.Su);
-            Resources["DangerBrush"] = new SolidColorBrush(t.Da);
+            Resources["BorderBrush"]     = new SolidColorBrush(t.Bo);
+            Resources["PanelBrush"]      = new SolidColorBrush(t.Pa);
+            Resources["SuccessBrush"]    = new SolidColorBrush(t.Su);
+            Resources["DangerBrush"]     = new SolidColorBrush(t.Da);
 
             var map = new Dictionary<string, Button?>
             {
-                ["Blue"] = SwatchBlue,
-                ["Purple"] = SwatchPurple,
+                ["Blue"]    = SwatchBlue,
+                ["Purple"]  = SwatchPurple,
                 ["Emerald"] = SwatchEmerald,
                 ["Crimson"] = SwatchCrimson,
-                ["Gold"] = SwatchGold
+                ["Gold"]    = SwatchGold
             };
 
             foreach (var kv in map)
             {
                 if (kv.Value == null) continue;
                 kv.Value.BorderThickness = kv.Key == theme ? new Thickness(3) : new Thickness(1.5);
-                kv.Value.Opacity = kv.Key == theme ? 1.0 : 0.6;
+                kv.Value.Opacity         = kv.Key == theme ? 1.0 : 0.6;
             }
 
             SetModeButtonVisual();
         }
 
-        // Tabs
-        private void TabCmd_Click(object s, RoutedEventArgs e) => ShowTab("cmd");
+        // ── Tabs ─────────────────────────────────────────────────────────────
+        private void TabCmd_Click(object s, RoutedEventArgs e)     => ShowTab("cmd");
         private void TabOptions_Click(object s, RoutedEventArgs e) => ShowTab("options");
 
         private void ShowTab(string tab)
         {
             if (TabCmdPanel == null) return;
-            TabCmdPanel.Visibility = tab == "cmd" ? Visibility.Visible : Visibility.Collapsed;
+            TabCmdPanel.Visibility     = tab == "cmd"     ? Visibility.Visible : Visibility.Collapsed;
             TabOptionsPanel.Visibility = tab == "options" ? Visibility.Visible : Visibility.Collapsed;
 
             var accent = (Brush)Resources["AccentBrush"];
-            var muted = (Brush)Resources["TextMutedBrush"];
-            TabCmdBtn.Foreground = tab == "cmd" ? accent : muted;
+            var muted  = (Brush)Resources["TextMutedBrush"];
+            TabCmdBtn.Foreground     = tab == "cmd"     ? accent : muted;
             TabOptionsBtn.Foreground = tab == "options" ? accent : muted;
-            TabCmdBtn.BorderBrush = tab == "cmd" ? accent : Brushes.Transparent;
-            TabOptionsBtn.BorderBrush = tab == "options" ? accent : Brushes.Transparent;
+            TabCmdBtn.BorderBrush    = tab == "cmd"     ? accent : Brushes.Transparent;
+            TabOptionsBtn.BorderBrush= tab == "options" ? accent : Brushes.Transparent;
         }
 
-        // Modes
-        private void FastbootMode_Click(object s, RoutedEventArgs e) => SwitchMode(FlashMode.Fastboot);
-        private void EkoFlashMode_Click(object s, RoutedEventArgs e) => SwitchMode(FlashMode.EkoFlash);
-        private void SideloadMode_Click(object s, RoutedEventArgs e) => SwitchMode(FlashMode.Sideload);
-        private void ToolsMode_Click(object s, RoutedEventArgs e) => SwitchMode(FlashMode.Tools);
+        // ── Modes ─────────────────────────────────────────────────────────────
+        private void FastbootMode_Click(object s, RoutedEventArgs e)      => SwitchMode(FlashMode.Fastboot);
+        private void EkoFlashMode_Click(object s, RoutedEventArgs e)      => SwitchMode(FlashMode.EkoFlash);
+        private void SideloadMode_Click(object s, RoutedEventArgs e)      => SwitchMode(FlashMode.Sideload);
+        private void ToolsMode_Click(object s, RoutedEventArgs e)         => SwitchMode(FlashMode.Tools);
         private void BackupRestoreMode_Click(object s, RoutedEventArgs e) => SwitchMode(FlashMode.BackupRestore);
 
         private void SwitchMode(FlashMode mode)
         {
-            _mode = mode;
-            _ekoBackend = EkoBackend.None;
-            _deviceChecked = false;
+            _mode            = mode;
+            _ekoBackend      = EkoBackend.None;
+            _deviceChecked   = false;
             _deviceConnected = false;
+            _connectedSerial = null;         // ← reset serial on mode switch
+
             SetModeButtonVisual();
 
             if (_uiReady)
             {
-                PanelFastboot.Visibility = mode == FlashMode.Fastboot ? Visibility.Visible : Visibility.Collapsed;
-                PanelEkoFlash.Visibility = mode == FlashMode.EkoFlash ? Visibility.Visible : Visibility.Collapsed;
-                PanelSideload.Visibility = mode == FlashMode.Sideload ? Visibility.Visible : Visibility.Collapsed;
-                PanelTools.Visibility = mode == FlashMode.Tools ? Visibility.Visible : Visibility.Collapsed;
+                PanelFastboot.Visibility = mode == FlashMode.Fastboot  ? Visibility.Visible : Visibility.Collapsed;
+                PanelEkoFlash.Visibility = mode == FlashMode.EkoFlash  ? Visibility.Visible : Visibility.Collapsed;
+                PanelSideload.Visibility = mode == FlashMode.Sideload  ? Visibility.Visible : Visibility.Collapsed;
+                PanelTools.Visibility    = mode == FlashMode.Tools     ? Visibility.Visible : Visibility.Collapsed;
 
                 var backupPanel = GetBackupPanel();
                 if (backupPanel != null)
                     backupPanel.Visibility = mode == FlashMode.BackupRestore ? Visibility.Visible : Visibility.Collapsed;
 
-                DeviceStatusText.Text = "Not checked";
+                DeviceStatusText.Text       = "Not checked";
                 DeviceStatusText.Foreground = (Brush)Resources["WarningBrush"];
             }
 
@@ -182,22 +187,23 @@ namespace EkoTurboTool
 
         private void SetModeButtonVisual()
         {
-            var on = (Brush)Resources["AccentSoftBrush"];
+            var on  = (Brush)Resources["AccentSoftBrush"];
             var off = new SolidColorBrush(Color.FromArgb(0x2D, 0x18, 0x25, 0x3D));
-            FastbootBtn.Background = _mode == FlashMode.Fastboot ? on : off;
-            EkoFlashBtn.Background = _mode == FlashMode.EkoFlash ? on : off;
-            SideloadBtn.Background = _mode == FlashMode.Sideload ? on : off;
-            ToolsBtn.Background = _mode == FlashMode.Tools ? on : off;
+            FastbootBtn.Background = _mode == FlashMode.Fastboot  ? on : off;
+            EkoFlashBtn.Background = _mode == FlashMode.EkoFlash  ? on : off;
+            SideloadBtn.Background = _mode == FlashMode.Sideload  ? on : off;
+            ToolsBtn.Background    = _mode == FlashMode.Tools     ? on : off;
 
             var backupBtn = GetBackupModeButton();
             if (backupBtn != null)
                 backupBtn.Background = _mode == FlashMode.BackupRestore ? on : off;
         }
 
+        // ── Row builders ──────────────────────────────────────────────────────
         private void BuildFastbootRows()
         {
             _fbRows = new ObservableCollection<FlashRow>();
-            foreach (var e in new[] { ("boot", "BOOT"), ("recovery", "RECOVERY"), ("system", "SYSTEM"), ("vendor", "VENDOR"), ("product", "PRODUCT"), ("vbmeta", "VBMETA"), ("vendor_boot", "VENDOR_BOOT"), ("userdata", "USERDATA") })
+            foreach (var e in new[] { ("boot","BOOT"), ("recovery","RECOVERY"), ("system","SYSTEM"), ("vendor","VENDOR"), ("product","PRODUCT"), ("vbmeta","VBMETA"), ("vendor_boot","VENDOR_BOOT"), ("userdata","USERDATA") })
                 _fbRows.Add(new FlashRow { Key = e.Item1, Label = e.Item2 });
 
             foreach (var r in _fbRows)
@@ -209,7 +215,7 @@ namespace EkoTurboTool
         private void BuildEkoFlashRows()
         {
             _ekoRows = new ObservableCollection<FlashRow>();
-            foreach (var e in new[] { ("BL", "BL"), ("AP", "AP"), ("CP", "CP"), ("CSC", "CSC"), ("USERDATA", "USERDATA") })
+            foreach (var e in new[] { ("BL","BL"), ("AP","AP"), ("CP","CP"), ("CSC","CSC"), ("USERDATA","USERDATA") })
                 _ekoRows.Add(new FlashRow { Key = e.Item1, Label = e.Item2 });
 
             foreach (var r in _ekoRows)
@@ -218,7 +224,7 @@ namespace EkoTurboTool
             EkoFlashRowsList.ItemsSource = _ekoRows;
         }
 
-        // Browse
+        // ── Browse ────────────────────────────────────────────────────────────
         private void Browse_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button b || b.Tag is not string key) return;
@@ -261,39 +267,68 @@ namespace EkoTurboTool
             if (dlg.ShowDialog() == true) { ApkPathBox.Text = dlg.FileName; AppendLog($"APK: {dlg.FileName}"); }
         }
 
-        // Detect
+        // ── Detect Device ─────────────────────────────────────────────────────
         private async void DetectDevice_Click(object s, RoutedEventArgs e)
         {
-            DeviceStatusText.Text = "Checking...";
+            _connectedSerial = null;
+            DeviceStatusText.Text       = "Checking...";
             DeviceStatusText.Foreground = (Brush)Resources["WarningBrush"];
+
             var r = await DetectAsync();
-            _deviceChecked = true; _deviceConnected = r.ok;
+            _deviceChecked   = true;
+            _deviceConnected = r.ok;
+
             DeviceStatusText.Text = r.text;
-            DeviceStatusText.Foreground = r.ok ? new SolidColorBrush(Color.FromRgb(77, 255, 154)) : new SolidColorBrush(Color.FromRgb(255, 122, 122));
-            foreach (var line in r.log.Split('\n')) if (!string.IsNullOrWhiteSpace(line)) AppendLog(line.Trim());
+            DeviceStatusText.Foreground = r.ok
+                ? new SolidColorBrush(Color.FromRgb(77, 255, 154))
+                : new SolidColorBrush(Color.FromRgb(255, 122, 122));
+
+            foreach (var line in r.log.Split('\n'))
+                if (!string.IsNullOrWhiteSpace(line)) AppendLog(line.Trim());
         }
 
         private async Task<(bool ok, string text, string log)> DetectAsync()
         {
+            // ── Fastboot / Tools mode ────────────────────────────────────────
             if (_mode == FlashMode.Fastboot || _mode == FlashMode.Tools)
             {
-                var r = await RunProcessAsync(FastbootPath, "devices", 12000);
+                var r   = await RunProcessAsync(FastbootPath, "devices", 12000);
                 bool ok = (r.Out + r.Err).ToLower().Contains("fastboot");
-                return ok ? (true, "FASTBOOT CONNECTED", "Fastboot device detected.") : (false, "NO FASTBOOT DEVICE", "No fastboot device found.");
+                return ok
+                    ? (true,  "FASTBOOT CONNECTED",  "Fastboot device detected.")
+                    : (false, "NO FASTBOOT DEVICE",  "No fastboot device found. Boot to Fastboot/Bootloader mode.");
             }
 
+            // ── Sideload / BackupRestore mode — use BackupService detector ───
             if (_mode == FlashMode.Sideload || _mode == FlashMode.BackupRestore)
             {
-                var r = await RunProcessAsync(AdbPath, "devices", 12000);
-                var m = (r.Out + r.Err).ToLower();
-                bool ok = m.Contains("\tdevice") || m.Contains("\tsideload");
-                return ok ? (true, "ADB CONNECTED", "ADB device detected.") : (false, "NO ADB DEVICE", "No ADB device found.");
+                var sb = new StringBuilder();
+                // BackupService.GetConnectedDeviceAsync logs detailed state per device
+                var serial = await BackupService.GetConnectedDeviceAsync(line => sb.AppendLine(line));
+
+                if (serial != null)
+                {
+                    _connectedSerial = serial;
+                    return (true, $"ADB CONNECTED [{serial}]", sb.ToString());
+                }
+
+                // Check if raw 'adb devices' output shows unauthorized/offline
+                var raw = await RunProcessAsync(AdbPath, "devices", 8000);
+                var rawOut = (raw.Out + raw.Err).ToLower();
+
+                if (rawOut.Contains("unauthorized"))
+                    return (false, "UNAUTHORIZED — allow USB debugging on phone", sb.ToString());
+
+                if (rawOut.Contains("offline"))
+                    return (false, "DEVICE OFFLINE — reconnect cable", sb.ToString());
+
+                return (false, "NO ADB DEVICE", sb.ToString());
             }
 
-            // EKO Flash mode
+            // ── EKO Flash mode ───────────────────────────────────────────────
             if (File.Exists(EkoFlashPath))
             {
-                var r = await RunProcessAsync(EkoFlashPath, "detect", 15000);
+                var r    = await RunProcessAsync(EkoFlashPath, "detect", 15000);
                 var full = (r.Out + r.Err).ToLower();
                 if (full.Contains("device detected") || full.Contains("found"))
                 {
@@ -304,10 +339,10 @@ namespace EkoTurboTool
                 return (false, "NO DOWNLOAD DEVICE", "ekoflash: no device found in download mode.");
             }
 
-            return (false, "NO DOWNLOAD DEVICE", "No download-mode device detected. ekoflash.exe not found in core.");
+            return (false, "NO DOWNLOAD DEVICE", "ekoflash.exe not found in core folder.");
         }
 
-        // Flash handlers
+        // ── Flash handlers ────────────────────────────────────────────────────
         private async void FlashOne_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button b || b.Tag is not string key) return;
@@ -326,7 +361,7 @@ namespace EkoTurboTool
 
         private async void StartFlashing_Click(object s, RoutedEventArgs e)
         {
-            if (!_deviceChecked) { AppendLog("Press Detect Device first."); return; }
+            if (!_deviceChecked)   { AppendLog("Press Detect Device first."); return; }
             if (!_deviceConnected) { AppendLog("Device not connected."); return; }
 
             if (_mode == FlashMode.Fastboot)
@@ -349,11 +384,10 @@ namespace EkoTurboTool
 
         private async Task FlashFastbootAsync(List<FlashRow> rows)
         {
-            if (!_deviceChecked) { AppendLog("Detect device first."); return; }
+            if (!_deviceChecked)   { AppendLog("Detect device first."); return; }
             if (!_deviceConnected) { AppendLog("Device not connected."); return; }
 
-            int total = rows.Count;
-            int i = 0;
+            int total = rows.Count, i = 0;
             foreach (var row in rows)
             {
                 i++;
@@ -361,8 +395,8 @@ namespace EkoTurboTool
                 AppendLog($"> fastboot {args}");
                 AppendLog($"[{row.Label}] 1/3 Prepare ({i}/{total})");
                 AppendLog($"[{row.Label}] 2/3 Flashing...");
-                var r = await RunProcessAsync(FastbootPath, args, 30 * 60 * 1000);
 
+                var r = await RunProcessAsync(FastbootPath, args, 30 * 60 * 1000);
                 if (r.Code != 0)
                 {
                     AppendLog($"[{row.Label}] FAILED (exit {r.Code})");
@@ -384,18 +418,18 @@ namespace EkoTurboTool
 
         private async Task FlashEkoAsync(List<FlashRow> rows)
         {
-            if (!_deviceChecked) { AppendLog("Detect device first."); return; }
-            if (!_deviceConnected) { AppendLog("Device not connected."); return; }
+            if (!_deviceChecked)                 { AppendLog("Detect device first."); return; }
+            if (!_deviceConnected)               { AppendLog("Device not connected."); return; }
             if (_ekoBackend != EkoBackend.EkoFlash) { AppendLog("ekoflash not ready. Press Detect Device."); return; }
 
-            int total = rows.Count;
-            int i = 0;
-
+            int total = rows.Count, i = 0;
             foreach (var row in rows)
             {
                 i++;
                 string imgPath = row.FilePath;
-                if (imgPath.EndsWith(".tar", StringComparison.OrdinalIgnoreCase) || imgPath.EndsWith(".md5", StringComparison.OrdinalIgnoreCase))
+
+                if (imgPath.EndsWith(".tar", StringComparison.OrdinalIgnoreCase) ||
+                    imgPath.EndsWith(".md5", StringComparison.OrdinalIgnoreCase))
                 {
                     AppendLog($"[{row.Label}] Extracting .img from {Path.GetFileName(imgPath)} ...");
                     var ex = await ExtractImgAsync(imgPath);
@@ -408,15 +442,15 @@ namespace EkoTurboTool
                 sb.Append($"flash --{row.Key.ToUpper()} \"{imgPath}\"");
                 if (!string.IsNullOrWhiteSpace(_pitFilePath)) sb.Append($" --pit \"{_pitFilePath}\"");
                 if (OptRePartition?.IsChecked == true && !string.IsNullOrWhiteSpace(_pitFilePath)) sb.Append(" --repartition");
-                if (OptNandErase?.IsChecked == true) sb.Append(" --nand-erase");
+                if (OptNandErase?.IsChecked == true)  sb.Append(" --nand-erase");
                 if (OptAutoReboot?.IsChecked != true) sb.Append(" --no-reboot");
 
                 string args = sb.ToString();
                 AppendLog($"> ekoflash {args}");
                 AppendLog($"[{row.Label}] 1/3 Prepare ({i}/{total})");
                 AppendLog($"[{row.Label}] 2/3 Flashing...");
-                var r = await RunProcessAsync(EkoFlashPath, args, 30 * 60 * 1000);
 
+                var r = await RunProcessAsync(EkoFlashPath, args, 30 * 60 * 1000);
                 if (r.Code != 0)
                 {
                     AppendLog($"[{row.Label}] FAILED (exit {r.Code})");
@@ -431,21 +465,27 @@ namespace EkoTurboTool
             AppendLog("EKO Flash flashing complete.");
         }
 
-        // Sideload
+        // ── Sideload ──────────────────────────────────────────────────────────
         private async void StartSideload_Click(object s, RoutedEventArgs e) => await StartSideloadInternal();
 
         private async Task StartSideloadInternal()
         {
             string path = SideloadPathBox.Text.Trim();
             if (string.IsNullOrEmpty(path)) { AppendLog("Select an OTA ZIP first."); return; }
-            AppendLog($"> adb sideload \"{path}\"");
-            var r = await RunProcessAsync(AdbPath, $"sideload \"{path}\"", 30 * 60 * 1000);
+
+            // Use serial if available
+            string adbArgs = _connectedSerial != null
+                ? $"-s {_connectedSerial} sideload \"{path}\""
+                : $"sideload \"{path}\"";
+
+            AppendLog($"> adb {adbArgs}");
+            var r = await RunProcessAsync(AdbPath, adbArgs, 30 * 60 * 1000);
             if (!string.IsNullOrWhiteSpace(r.Out)) AppendLog(r.Out.Trim());
             if (!string.IsNullOrWhiteSpace(r.Err)) AppendLog(r.Err.Trim());
             AppendLog(r.Code == 0 ? "Sideload complete ✓" : "Sideload FAILED.");
         }
 
-        // Extract tar/md5
+        // ── Extract tar/md5 ───────────────────────────────────────────────────
         private async Task<string?> ExtractImgAsync(string tarPath)
         {
             return await Task.Run(() =>
@@ -455,17 +495,16 @@ namespace EkoTurboTool
                     string outDir = Path.Combine(Path.GetTempPath(), "EkoTurboTool_extract");
                     Directory.CreateDirectory(outDir);
 
-                    using var fs = File.OpenRead(tarPath);
+                    using var fs  = File.OpenRead(tarPath);
                     using var tar = TarArchive.CreateInputTarArchive(fs, Encoding.UTF8);
                     tar.ExtractContents(outDir);
 
                     var imgs = Directory.GetFiles(outDir, "*.img", SearchOption.AllDirectories);
                     if (imgs.Length > 0) return imgs[0];
 
-                    var any = Directory.GetFiles(outDir, "*", SearchOption.AllDirectories)
-                                       .Where(f => !f.EndsWith(".md5", StringComparison.OrdinalIgnoreCase))
-                                       .FirstOrDefault();
-                    return any;
+                    return Directory.GetFiles(outDir, "*", SearchOption.AllDirectories)
+                                    .Where(f => !f.EndsWith(".md5", StringComparison.OrdinalIgnoreCase))
+                                    .FirstOrDefault();
                 }
                 catch (Exception ex)
                 {
@@ -475,26 +514,41 @@ namespace EkoTurboTool
             });
         }
 
-        // Quick commands
+        // ── Quick commands ────────────────────────────────────────────────────
         private async void QuickCmd_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button b || b.Tag is not string cmd) return;
             AppendLog($"> {cmd}");
+
             var parts = cmd.Split(' ', 2);
-            string exe = parts[0] == "adb" ? AdbPath : (parts[0] == "fastboot" ? FastbootPath : null);
+            string? exe = parts[0] switch
+            {
+                "adb"      => AdbPath,
+                "fastboot" => FastbootPath,
+                _          => null
+            };
             if (exe == null) return;
-            var r = await RunProcessAsync(exe, parts.Length > 1 ? parts[1] : "", 30000);
+
+            // Inject serial for ADB quick commands
+            string args = parts.Length > 1 ? parts[1] : "";
+            if (parts[0] == "adb" && _connectedSerial != null)
+                args = $"-s {_connectedSerial} {args}";
+
+            var r = await RunProcessAsync(exe, args, 30000);
             if (!string.IsNullOrWhiteSpace(r.Out)) AppendLog(r.Out.TrimEnd());
             if (!string.IsNullOrWhiteSpace(r.Err)) AppendLog(r.Err.TrimEnd());
         }
 
-        // Custom commands
+        // ── Custom commands ───────────────────────────────────────────────────
         private async void RunCustomAdb_Click(object s, RoutedEventArgs e)
         {
             string args = CustomAdbBox.Text.Trim();
             if (string.IsNullOrEmpty(args)) { AppendLog("Enter adb args."); return; }
-            AppendLog($"> adb {args}");
-            var r = await RunProcessAsync(AdbPath, args, 60000);
+
+            // Prepend serial if known
+            string fullArgs = _connectedSerial != null ? $"-s {_connectedSerial} {args}" : args;
+            AppendLog($"> adb {fullArgs}");
+            var r = await RunProcessAsync(AdbPath, fullArgs, 60000);
             if (!string.IsNullOrWhiteSpace(r.Out)) AppendLog(r.Out.TrimEnd());
             if (!string.IsNullOrWhiteSpace(r.Err)) AppendLog(r.Err.TrimEnd());
         }
@@ -513,14 +567,19 @@ namespace EkoTurboTool
         {
             string p = ApkPathBox.Text.Trim();
             if (string.IsNullOrEmpty(p)) { AppendLog("Select APK first."); return; }
-            AppendLog($"> adb install \"{p}\"");
-            var r = await RunProcessAsync(AdbPath, $"install \"{p}\"", 120000);
+
+            string args = _connectedSerial != null
+                ? $"-s {_connectedSerial} install \"{p}\""
+                : $"install \"{p}\"";
+
+            AppendLog($"> adb {args}");
+            var r = await RunProcessAsync(AdbPath, args, 120000);
             if (!string.IsNullOrWhiteSpace(r.Out)) AppendLog(r.Out.TrimEnd());
             if (!string.IsNullOrWhiteSpace(r.Err)) AppendLog(r.Err.TrimEnd());
             AppendLog(r.Code == 0 ? "APK installed ✓" : "APK install FAILED.");
         }
 
-        // Wipe / Reboot / Reset
+        // ── Wipe / Reboot / Reset ─────────────────────────────────────────────
         private async void WipeData_Click(object s, RoutedEventArgs e)
         {
             if (_mode != FlashMode.Fastboot) { AppendLog("Wipe: Fastboot mode only."); return; }
@@ -537,7 +596,8 @@ namespace EkoTurboTool
             }
             else if (_mode == FlashMode.Sideload || _mode == FlashMode.BackupRestore)
             {
-                await RunProcessAsync(AdbPath, "reboot", 15000);
+                string args = _connectedSerial != null ? $"-s {_connectedSerial} reboot" : "reboot";
+                await RunProcessAsync(AdbPath, args, 15000);
                 AppendLog("Reboot: adb reboot");
             }
             else if (_ekoBackend == EkoBackend.EkoFlash)
@@ -553,38 +613,44 @@ namespace EkoTurboTool
 
         private void ResetAll_Click(object s, RoutedEventArgs e)
         {
-            foreach (var r in _fbRows) r.FilePath = "";
+            foreach (var r in _fbRows)  r.FilePath = "";
             foreach (var r in _ekoRows) r.FilePath = "";
-            _pitFilePath = "";
-            PitPathBox.Text = "";
-            if (SideloadPathBox != null) SideloadPathBox.Text = "";
-            if (ApkPathBox != null) ApkPathBox.Text = "";
-            if (CustomAdbBox != null) CustomAdbBox.Text = "";
-            if (CustomFastbootBox != null) CustomFastbootBox.Text = "";
+            _pitFilePath     = "";
+            _connectedSerial = null;
+            PitPathBox.Text  = "";
+            if (SideloadPathBox    != null) SideloadPathBox.Text    = "";
+            if (ApkPathBox         != null) ApkPathBox.Text         = "";
+            if (CustomAdbBox       != null) CustomAdbBox.Text       = "";
+            if (CustomFastbootBox  != null) CustomFastbootBox.Text  = "";
             CommandPreviewBox.Clear();
             AppendLog("All cleared.");
         }
 
-        // Preview
+        // ── Command preview ───────────────────────────────────────────────────
         private void UpdateCommandPreview()
         {
             var lines = new List<string>();
+
             if (_mode == FlashMode.Fastboot)
-                lines.AddRange(_fbRows.Where(r => !string.IsNullOrWhiteSpace(r.FilePath)).Select(r => $"fastboot flash {r.Key.ToLower()} \"{r.FilePath}\""));
+                lines.AddRange(_fbRows.Where(r => !string.IsNullOrWhiteSpace(r.FilePath))
+                                      .Select(r => $"fastboot flash {r.Key.ToLower()} \"{r.FilePath}\""));
+
             else if (_mode == FlashMode.EkoFlash)
             {
                 if (!string.IsNullOrWhiteSpace(_pitFilePath)) lines.Add($"# PIT: {_pitFilePath}");
-                lines.AddRange(_ekoRows.Where(r => !string.IsNullOrWhiteSpace(r.FilePath)).Select(r => $"ekoflash flash --{r.Key.ToUpper()} \"{r.FilePath}\""));
+                lines.AddRange(_ekoRows.Where(r => !string.IsNullOrWhiteSpace(r.FilePath))
+                                       .Select(r => $"ekoflash flash --{r.Key.ToUpper()} \"{r.FilePath}\""));
             }
             else if (_mode == FlashMode.Sideload && SideloadPathBox != null && !string.IsNullOrWhiteSpace(SideloadPathBox.Text))
                 lines.Add($"adb sideload \"{SideloadPathBox.Text}\"");
+
             else if (_mode == FlashMode.BackupRestore)
-                lines.Add("Backup/Restore mode uses adb shell su -c + tar + pull/push");
+                lines.Add("Backup/Restore mode — adb shell su -c + tar + pull/push");
 
             CommandPreviewBox.Text = lines.Count == 0 ? "No command queued." : string.Join(Environment.NewLine, lines);
         }
 
-        // Log
+        // ── Log ───────────────────────────────────────────────────────────────
         private void AppendLog(string msg)
         {
             if (!_uiReady || LogBox == null) return;
@@ -595,27 +661,27 @@ namespace EkoTurboTool
             });
         }
 
-        // Process helpers
+        // ── Process helper ────────────────────────────────────────────────────
         private async Task<(int Code, string Out, string Err)> RunProcessAsync(string fileName, string args, int ms)
         {
             try
             {
                 var psi = new ProcessStartInfo
                 {
-                    FileName = fileName,
-                    Arguments = args,
-                    UseShellExecute = false,
+                    FileName               = fileName,
+                    Arguments              = args,
+                    UseShellExecute        = false,
                     RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true
+                    RedirectStandardError  = true,
+                    CreateNoWindow         = true
                 };
 
-                using var p = new Process { StartInfo = psi };
-                var o = new StringBuilder();
+                using var p  = new Process { StartInfo = psi };
+                var o  = new StringBuilder();
                 var er = new StringBuilder();
 
-                p.OutputDataReceived += (_, e) => { if (e.Data != null) o.AppendLine(e.Data); };
-                p.ErrorDataReceived += (_, e) => { if (e.Data != null) er.AppendLine(e.Data); };
+                p.OutputDataReceived += (_, e) => { if (e.Data != null) o.AppendLine(e.Data);  };
+                p.ErrorDataReceived  += (_, e) => { if (e.Data != null) er.AppendLine(e.Data); };
 
                 p.Start();
                 p.BeginOutputReadLine();
@@ -623,22 +689,31 @@ namespace EkoTurboTool
 
                 using var cts = new CancellationTokenSource(ms);
                 try { await p.WaitForExitAsync(cts.Token); }
-                catch (OperationCanceledException) { try { p.Kill(true); } catch { } return (-1, o.ToString(), $"Timeout {ms / 1000}s"); }
+                catch (OperationCanceledException)
+                {
+                    try { p.Kill(true); } catch { }
+                    return (-1, o.ToString(), $"Timeout {ms / 1000}s");
+                }
 
                 return (p.ExitCode, o.ToString(), er.ToString());
             }
             catch (Exception ex) { return (-1, "", ex.Message); }
         }
 
-        // Backup / Restore
+        // ── Backup / Restore ──────────────────────────────────────────────────
         private async void LoadApps_Click(object sender, RoutedEventArgs e)
         {
             _backupApps.Clear();
-            AppendLog("Loading apps list (root) ...");
+            AppendLog("Checking device...");
+
+            // Refresh serial before loading
+            _connectedSerial = await BackupService.GetConnectedDeviceAsync(AppendLog);
+            if (_connectedSerial == null) { AppendLog("No device found. Connect phone and enable USB debugging."); return; }
 
             bool rootOk = await BackupService.CheckRootAsync(AppendLog);
-            if (!rootOk) { AppendLog("Root check failed."); return; }
+            if (!rootOk) { AppendLog("Root check failed — root access required."); return; }
 
+            AppendLog("Loading installed apps...");
             var apps = await BackupService.GetInstalledAppsAsync(AppendLog);
             foreach (var a in apps)
             {
@@ -647,7 +722,7 @@ namespace EkoTurboTool
                 {
                     PackageName = a.PackageName,
                     DisplayName = a.DisplayName,
-                    IconLetter = letter
+                    IconLetter  = letter
                 });
             }
 
@@ -661,29 +736,32 @@ namespace EkoTurboTool
 
             var options = new BackupOptions
             {
-                BackupApk = GetBkApkOpt()?.IsChecked == true,
-                BackupData = GetBkDataOpt()?.IsChecked == true,
+                BackupApk    = GetBkApkOpt()?.IsChecked    == true,
+                BackupData   = GetBkDataOpt()?.IsChecked   == true,
                 BackupUserDe = GetBkUserDeOpt()?.IsChecked == true,
-                BackupObb = GetBkObbOpt()?.IsChecked == true
+                BackupObb    = GetBkObbOpt()?.IsChecked    == true
             };
 
             if (!options.BackupApk && !options.BackupData && !options.BackupUserDe && !options.BackupObb)
             {
-                AppendLog("Select at least one backup option.");
+                AppendLog("Select at least one backup option (APK / Data / UserDe / OBB).");
                 return;
             }
+
+            // Re-check device before starting
+            _connectedSerial = await BackupService.GetConnectedDeviceAsync(AppendLog);
+            if (_connectedSerial == null) { AppendLog("No device connected. Backup aborted."); return; }
 
             bool rootOk = await BackupService.CheckRootAsync(AppendLog);
             if (!rootOk) { AppendLog("Root check failed."); return; }
 
-            int total = selected.Count;
-            int idx = 0;
+            int total = selected.Count, idx = 0;
             foreach (var app in selected)
             {
                 idx++;
                 AppendLog($"[{idx}/{total}] Backup start: {app.PackageName}");
                 var ok = await BackupService.BackupAppAsync(app.PackageName, app.DisplayName, options, AppendLog);
-                AppendLog(ok ? $"Backup done: {app.PackageName}" : $"Backup failed: {app.PackageName}");
+                AppendLog(ok ? $"✓ Backup done: {app.PackageName}" : $"✗ Backup failed: {app.PackageName}");
             }
 
             AppendLog("Backup batch finished.");
@@ -701,11 +779,11 @@ namespace EkoTurboTool
                 var letter = string.IsNullOrWhiteSpace(b.DisplayName) ? "?" : b.DisplayName.Substring(0, 1).ToUpperInvariant();
                 _backupSets.Add(new BackupSetRow
                 {
-                    BackupPath = b.BackupPath,
-                    PackageName = b.PackageName,
-                    DisplayName = b.DisplayName,
-                    BackupDateText = b.BackupDate.ToString("yyyy-MM-dd HH:mm:ss"),
-                    IconLetter = letter
+                    BackupPath      = b.BackupPath,
+                    PackageName     = b.PackageName,
+                    DisplayName     = b.DisplayName,
+                    BackupDateText  = b.BackupDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                    IconLetter      = letter
                 });
             }
             AppendLog($"Backups found: {_backupSets.Count}");
@@ -720,23 +798,29 @@ namespace EkoTurboTool
                 return;
             }
 
+            // Re-check device before restore
+            _connectedSerial = await BackupService.GetConnectedDeviceAsync(AppendLog);
+            if (_connectedSerial == null) { AppendLog("No device connected. Restore aborted."); return; }
+
             bool rootOk = await BackupService.CheckRootAsync(AppendLog);
             if (!rootOk) { AppendLog("Root check failed."); return; }
 
             AppendLog($"Restore start: {sel.PackageName}");
             var ok = await BackupService.RestoreBackupAsync(sel.BackupPath, AppendLog);
-            AppendLog(ok ? "Restore completed." : "Restore failed.");
+            AppendLog(ok ? "✓ Restore completed." : "✗ Restore failed.");
         }
     }
 
+    // ── View models ───────────────────────────────────────────────────────────
     public class FlashRow : INotifyPropertyChanged
     {
         private string _fp = "";
-        public string Key { get; set; } = "";
-        public string Label { get; set; } = "";
+        public string Key      { get; set; } = "";
+        public string Label    { get; set; } = "";
         public string FilePath { get => _fp; set { if (_fp == value) return; _fp = value; OnPropertyChanged(); } }
         public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string? p = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(p));
+        private void OnPropertyChanged([CallerMemberName] string? p = null) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(p));
     }
 
     public class BackupAppRow : INotifyPropertyChanged
@@ -744,7 +828,7 @@ namespace EkoTurboTool
         private bool _isSelected;
         public string PackageName { get; set; } = "";
         public string DisplayName { get; set; } = "";
-        public string IconLetter { get; set; } = "?";
+        public string IconLetter  { get; set; } = "?";
 
         public bool IsSelected
         {
@@ -762,10 +846,10 @@ namespace EkoTurboTool
 
     public class BackupSetRow
     {
-        public string BackupPath { get; set; } = "";
-        public string PackageName { get; set; } = "";
-        public string DisplayName { get; set; } = "";
+        public string BackupPath     { get; set; } = "";
+        public string PackageName    { get; set; } = "";
+        public string DisplayName    { get; set; } = "";
         public string BackupDateText { get; set; } = "";
-        public string IconLetter { get; set; } = "?";
+        public string IconLetter     { get; set; } = "?";
     }
 }
