@@ -6,8 +6,7 @@
         MinWidth="1100" MinHeight="700"
         WindowStartupLocation="CenterScreen"
         Background="#08101E" Foreground="#EAF4FF"
-        FontFamily="Segoe UI"
->
+        FontFamily="Segoe UI">
 
     <Window.Resources>
         <SolidColorBrush x:Key="MainBgBrush"     Color="#08101E"/>
@@ -51,11 +50,11 @@
         </Style>
 
         <Style x:Key="PathBox" TargetType="TextBox">
-            <Setter Property="Background"              Value="#2C132443"/>
-            <Setter Property="BorderBrush"             Value="{DynamicResource BorderBrush}"/>
-            <Setter Property="BorderThickness"         Value="1"/>
-            <Setter Property="Foreground"              Value="#EAF4FF"/>
-            <Setter Property="Padding"                 Value="7,5"/>
+            <Setter Property="Background"               Value="#2C132443"/>
+            <Setter Property="BorderBrush"              Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness"          Value="1"/>
+            <Setter Property="Foreground"               Value="#EAF4FF"/>
+            <Setter Property="Padding"                  Value="7,5"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
 
@@ -138,8 +137,10 @@
         </Style>
 
         <Style x:Key="SwatchBtn" TargetType="Button">
-            <Setter Property="Width"  Value="26"/><Setter Property="Height" Value="26"/>
-            <Setter Property="Margin" Value="4,0,0,0"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width"           Value="26"/>
+            <Setter Property="Height"          Value="26"/>
+            <Setter Property="Margin"          Value="4,0,0,0"/>
+            <Setter Property="Cursor"          Value="Hand"/>
             <Setter Property="BorderThickness" Value="2"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -153,18 +154,22 @@
         </Style>
 
         <Style x:Key="OdinCheck" TargetType="CheckBox">
-            <Setter Property="Foreground" Value="#C8E8FF"/><Setter Property="FontSize" Value="12"/>
-            <Setter Property="Margin" Value="0,0,0,6"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="#C8E8FF"/>
+            <Setter Property="FontSize"   Value="12"/>
+            <Setter Property="Margin"     Value="0,0,0,6"/>
+            <Setter Property="Cursor"     Value="Hand"/>
         </Style>
 
         <Style x:Key="TabBtn" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Background"      Value="Transparent"/>
+            <Setter Property="BorderBrush"     Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0,0,0,2"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
-            <Setter Property="Padding" Value="12,5"/><Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="Foreground"      Value="{DynamicResource TextMutedBrush}"/>
+            <Setter Property="Padding"         Value="12,5"/>
+            <Setter Property="FontSize"        Value="12"/>
+            <Setter Property="FontWeight"      Value="SemiBold"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Margin"          Value="0,0,4,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -176,6 +181,16 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <!-- ── Backup ListView style ── -->
+        <Style x:Key="BackupList" TargetType="ListView">
+            <Setter Property="Background"      Value="#2A12223D"/>
+            <Setter Property="BorderBrush"     Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground"      Value="#EAF4FF"/>
+            <Setter Property="FontSize"        Value="11"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
         </Style>
     </Window.Resources>
 
@@ -199,13 +214,14 @@
                     <RowDefinition Height="175"/>
                 </Grid.RowDefinitions>
 
-                <!-- HEADER -->
+                <!-- ═══════════════ HEADER ═══════════════ -->
                 <Grid Grid.Row="0" Margin="4,2,4,10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+
                     <Grid Width="66" Height="66" Margin="0,0,14,0">
                         <Ellipse Fill="#3037CFFF"><Ellipse.Effect><BlurEffect Radius="11"/></Ellipse.Effect></Ellipse>
                         <Ellipse Fill="#1A1E3A55" Stroke="{DynamicResource AccentBrush}" StrokeThickness="2"/>
@@ -214,35 +230,42 @@
                         <TextBlock Text="ET" HorizontalAlignment="Center" VerticalAlignment="Center"
                                    FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" FontSize="21"/>
                     </Grid>
+
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock Text="EKO TURBO" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
-                        <TextBlock Text="Fastboot  |  EKO Flash  |  ADB / Sideload  |  Tools"
+                        <TextBlock Text="Fastboot  |  EKO Flash  |  ADB / Sideload  |  Backup &amp; Restore  |  Tools"
                                    Foreground="{DynamicResource TextMutedBrush}" FontSize="13" Margin="2,2,0,0"/>
                         <TextBlock Text="by @EkoTeam" Foreground="#5A8BAA" FontSize="11" Margin="2,1,0,0"/>
                     </StackPanel>
+
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="Theme" Foreground="#6AACCF" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <Button x:Name="SwatchBlue" Style="{StaticResource SwatchBtn}" Background="#37CFFF" BorderBrush="#AAEEFF" Tag="Blue" Click="Swatch_Click" ToolTip="Blue"/>
-                        <Button x:Name="SwatchPurple" Style="{StaticResource SwatchBtn}" Background="#B67BFF" BorderBrush="#DDB6FF" Tag="Purple" Click="Swatch_Click" ToolTip="Purple"/>
+                        <Button x:Name="SwatchBlue"    Style="{StaticResource SwatchBtn}" Background="#37CFFF" BorderBrush="#AAEEFF" Tag="Blue"    Click="Swatch_Click" ToolTip="Blue"/>
+                        <Button x:Name="SwatchPurple"  Style="{StaticResource SwatchBtn}" Background="#B67BFF" BorderBrush="#DDB6FF" Tag="Purple"  Click="Swatch_Click" ToolTip="Purple"/>
                         <Button x:Name="SwatchEmerald" Style="{StaticResource SwatchBtn}" Background="#43F2C2" BorderBrush="#A0FFE8" Tag="Emerald" Click="Swatch_Click" ToolTip="Emerald"/>
                         <Button x:Name="SwatchCrimson" Style="{StaticResource SwatchBtn}" Background="#FF6DA8" BorderBrush="#FFAACC" Tag="Crimson" Click="Swatch_Click" ToolTip="Crimson"/>
-                        <Button x:Name="SwatchGold" Style="{StaticResource SwatchBtn}" Background="#FFB830" BorderBrush="#FFD880" Tag="Gold" Click="Swatch_Click" ToolTip="Gold"/>
+                        <Button x:Name="SwatchGold"    Style="{StaticResource SwatchBtn}" Background="#FFB830" BorderBrush="#FFD880" Tag="Gold"    Click="Swatch_Click" ToolTip="Gold"/>
                     </StackPanel>
                 </Grid>
 
-                <!-- MODE BAR -->
+                <!-- ═══════════════ MODE BAR ═══════════════ -->
                 <Grid Grid.Row="1" Margin="4,0,4,10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+
+                    <!-- Mode buttons — BackupRestoreBtn added -->
                     <StackPanel Orientation="Horizontal">
-                        <Button x:Name="FastbootBtn" Style="{StaticResource ModeButton}" Width="155" Height="34" Content="FASTBOOT MODE" Click="FastbootMode_Click"/>
-                        <Button x:Name="EkoFlashBtn" Style="{StaticResource ModeButton}" Width="135" Height="34" Content="EKO FLASH MODE" Click="EkoFlashMode_Click"/>
-                        <Button x:Name="SideloadBtn" Style="{StaticResource ModeButton}" Width="150" Height="34" Content="ADB SIDELOAD" Click="SideloadMode_Click"/>
-                        <Button x:Name="ToolsBtn" Style="{StaticResource ModeButton}" Width="135" Height="34" Content="ADB / TOOLS" Click="ToolsMode_Click"/>
+                        <Button x:Name="FastbootBtn"      Style="{StaticResource ModeButton}" Width="145" Height="34" Content="FASTBOOT MODE"    Click="FastbootMode_Click"/>
+                        <Button x:Name="EkoFlashBtn"      Style="{StaticResource ModeButton}" Width="135" Height="34" Content="EKO FLASH MODE"   Click="EkoFlashMode_Click"/>
+                        <Button x:Name="SideloadBtn"      Style="{StaticResource ModeButton}" Width="140" Height="34" Content="ADB SIDELOAD"     Click="SideloadMode_Click"/>
+                        <Button x:Name="ToolsBtn"         Style="{StaticResource ModeButton}" Width="125" Height="34" Content="ADB / TOOLS"      Click="ToolsMode_Click"/>
+                        <Button x:Name="BackupRestoreBtn" Style="{StaticResource ModeButton}" Width="150" Height="34" Content="BACKUP / RESTORE"  Click="BackupRestoreMode_Click"/>
                     </StackPanel>
+
+                    <!-- Device status -->
                     <Border Grid.Column="2" Style="{StaticResource GlassPanel}" Padding="12,6" Margin="10,0,0,0">
                         <DockPanel LastChildFill="False">
                             <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
@@ -260,14 +283,14 @@
                     </Border>
                 </Grid>
 
-                <!-- MAIN CONTENT -->
+                <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
                 <Grid Grid.Row="2" Margin="4,0,4,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="280"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- LEFT panel -->
+                    <!-- ── LEFT panel ── -->
                     <Border Style="{StaticResource GlassPanel}">
                         <Grid>
 
@@ -383,14 +406,14 @@
                                         <TextBlock Text="ADB QUICK COMMANDS" FontSize="11" FontWeight="Bold"
                                                    Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,5"/>
                                         <WrapPanel>
-                                            <Button Style="{StaticResource CmdBtn}" Content="adb devices" Tag="adb devices" Click="QuickCmd_Click"/>
-                                            <Button Style="{StaticResource CmdBtn}" Content="adb reboot" Tag="adb reboot" Click="QuickCmd_Click"/>
-                                            <Button Style="{StaticResource CmdBtn}" Content="adb reboot recovery" Tag="adb reboot recovery" Click="QuickCmd_Click"/>
-                                            <Button Style="{StaticResource CmdBtn}" Content="adb reboot bootloader" Tag="adb reboot bootloader" Click="QuickCmd_Click"/>
-                                            <Button Style="{StaticResource CmdBtn}" Content="adb reboot sideload" Tag="adb reboot sideload" Click="QuickCmd_Click"/>
-                                            <Button Style="{StaticResource CmdBtn}" Content="adb get-state" Tag="adb get-state" Click="QuickCmd_Click"/>
-                                            <Button Style="{StaticResource CmdBtn}" Content="adb shell getprop" Tag="adb shell getprop ro.product.model" Click="QuickCmd_Click"/>
-                                            <Button Style="{StaticResource CmdBtn}" Content="adb shell getprop sdk" Tag="adb shell getprop ro.build.version.sdk" Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb devices"          Tag="adb devices"                              Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb reboot"           Tag="adb reboot"                               Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb reboot recovery"  Tag="adb reboot recovery"                      Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb reboot bootloader" Tag="adb reboot bootloader"                   Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb reboot sideload"  Tag="adb reboot sideload"                      Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb get-state"        Tag="adb get-state"                            Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb shell getprop"    Tag="adb shell getprop ro.product.model"       Click="QuickCmd_Click"/>
+                                            <Button Style="{StaticResource CmdBtn}" Content="adb shell getprop sdk" Tag="adb shell getprop ro.build.version.sdk"  Click="QuickCmd_Click"/>
                                         </WrapPanel>
                                     </StackPanel>
                                 </Border>
@@ -473,12 +496,148 @@
                                         </Grid>
                                     </StackPanel>
                                 </Border>
-
                             </Grid>
+
+                            <!-- ════════════════════════════════════════════
+                                 BACKUP / RESTORE  —  PanelBackupRestore
+                                 ════════════════════════════════════════════ -->
+                            <Grid x:Name="PanelBackupRestore" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Title + action buttons row -->
+                                <Grid Grid.Row="0" Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="BACKUP / RESTORE" FontSize="19" FontWeight="Bold"
+                                               Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Button Content="Load Apps" Width="95" Height="28" Margin="0,0,6,0"
+                                                Background="{DynamicResource AccentSoftBrush}"
+                                                BorderBrush="{DynamicResource AccentBrush}"
+                                                Foreground="#EFFFFF" Style="{StaticResource ActionButton}"
+                                                Click="LoadApps_Click"/>
+                                        <Button Content="Backup Selected" Width="125" Height="28"
+                                                Background="{DynamicResource SuccessBrush}"
+                                                BorderBrush="#881CE17A"
+                                                Foreground="#EFFFF7" Style="{StaticResource ActionButton}"
+                                                Click="StartBackup_Click"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- Backup options checkboxes -->
+                                <Border Grid.Row="1" Padding="8,6" Margin="0,0,0,6"
+                                        Background="#1A1A2E40" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" CornerRadius="9">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Backup:" Foreground="{DynamicResource TextMutedBrush}"
+                                                   FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                        <CheckBox x:Name="BkOptApk"    Content="APK"     IsChecked="True"  Style="{StaticResource OdinCheck}" Margin="0,0,14,0"/>
+                                        <CheckBox x:Name="BkOptData"   Content="Data"    IsChecked="True"  Style="{StaticResource OdinCheck}" Margin="0,0,14,0"/>
+                                        <CheckBox x:Name="BkOptUserDe" Content="User_DE" IsChecked="False" Style="{StaticResource OdinCheck}" Margin="0,0,14,0"/>
+                                        <CheckBox x:Name="BkOptObb"    Content="OBB"     IsChecked="False" Style="{StaticResource OdinCheck}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Apps list -->
+                                <ListView x:Name="BackupAppsList" Grid.Row="2"
+                                          Style="{StaticResource BackupList}"
+                                          SelectionMode="Extended">
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Width="30">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                  VerticalAlignment="Center"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Width="30">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <Border Width="24" Height="24" CornerRadius="12"
+                                                                Background="{DynamicResource AccentSoftBrush}">
+                                                            <TextBlock Text="{Binding IconLetter}"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                       FontSize="11" FontWeight="Bold" Foreground="#EFFFFF"/>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Header="Package" Width="340"
+                                                            DisplayMemberBinding="{Binding PackageName}"/>
+                                            <GridViewColumn Header="Display Name" Width="180"
+                                                            DisplayMemberBinding="{Binding DisplayName}"/>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+
+                                <!-- Separator -->
+                                <Border Grid.Row="3" Height="1" Background="#33FFFFFF" Margin="0,4,0,4"/>
+
+                                <!-- Saved backups header -->
+                                <Grid Grid.Row="4" Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="SAVED BACKUPS" FontSize="13" FontWeight="Bold"
+                                               Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
+                                    <Button Grid.Column="1" Content="Refresh" Width="80" Height="26" Margin="0,0,6,0"
+                                            Background="{DynamicResource AccentSoftBrush}"
+                                            BorderBrush="{DynamicResource AccentBrush}"
+                                            Foreground="#EFFFFF" Style="{StaticResource ActionButton}"
+                                            Click="RefreshBackups_Click"/>
+                                    <Button Grid.Column="2" Content="Restore Selected" Width="125" Height="26"
+                                            Background="#5A2756FF" BorderBrush="#882756FF"
+                                            Foreground="#EDFAFF" Style="{StaticResource ActionButton}"
+                                            Click="RestoreSelected_Click"/>
+                                </Grid>
+
+                                <!-- Backups list -->
+                                <ListView x:Name="BackupSetsList" Grid.Row="5"
+                                          Style="{StaticResource BackupList}"
+                                          SelectionMode="Single">
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Width="30">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <Border Width="24" Height="24" CornerRadius="12"
+                                                                Background="#5A27CCFF">
+                                                            <TextBlock Text="{Binding IconLetter}"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                       FontSize="11" FontWeight="Bold" Foreground="#EFFFFF"/>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Header="Package" Width="280"
+                                                            DisplayMemberBinding="{Binding PackageName}"/>
+                                            <GridViewColumn Header="Display Name" Width="160"
+                                                            DisplayMemberBinding="{Binding DisplayName}"/>
+                                            <GridViewColumn Header="Date" Width="150"
+                                                            DisplayMemberBinding="{Binding BackupDateText}"/>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                            </Grid>
+                            <!-- ════ END PanelBackupRestore ════ -->
+
                         </Grid>
                     </Border>
 
-                    <!-- RIGHT: tabs -->
+                    <!-- ── RIGHT: tabs ── -->
                     <Border Grid.Column="1" Margin="10,0,0,0" Style="{StaticResource GlassPanel}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -486,8 +645,8 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <Button x:Name="TabCmdBtn" Style="{StaticResource TabBtn}" Content="Command" Click="TabCmd_Click"/>
-                                <Button x:Name="TabOptionsBtn" Style="{StaticResource TabBtn}" Content="Options" Click="TabOptions_Click"/>
+                                <Button x:Name="TabCmdBtn"     Style="{StaticResource TabBtn}" Content="Command" Click="TabCmd_Click"/>
+                                <Button x:Name="TabOptionsBtn" Style="{StaticResource TabBtn}" Content="Options"  Click="TabOptions_Click"/>
                             </StackPanel>
 
                             <Grid x:Name="TabCmdPanel" Grid.Row="1">
@@ -511,13 +670,13 @@
                                 <TextBlock Text="EKO FLASH OPTIONS" FontSize="13" FontWeight="Bold"
                                            Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,10"/>
                                 <StackPanel Grid.Row="1" Margin="4,0,0,0">
-                                    <CheckBox x:Name="OptAutoReboot" Style="{StaticResource OdinCheck}" Content="Auto Reboot" IsChecked="True"/>
-                                    <CheckBox x:Name="OptNandErase" Style="{StaticResource OdinCheck}" Content="Nand Erase"/>
-                                    <CheckBox x:Name="OptRePartition" Style="{StaticResource OdinCheck}" Content="Re-Partition"/>
-                                    <CheckBox x:Name="OptFResetTime" Style="{StaticResource OdinCheck}" Content="F. Reset Time" IsChecked="True"/>
-                                    <CheckBox x:Name="OptDeviceInfo" Style="{StaticResource OdinCheck}" Content="Device Info"/>
-                                    <CheckBox x:Name="OptFlashLock" Style="{StaticResource OdinCheck}" Content="Flash Lock"/>
-                                    <CheckBox x:Name="OptDecompressData" Style="{StaticResource OdinCheck}" Content="Decompress Data"/>
+                                    <CheckBox x:Name="OptAutoReboot"      Style="{StaticResource OdinCheck}" Content="Auto Reboot"      IsChecked="True"/>
+                                    <CheckBox x:Name="OptNandErase"       Style="{StaticResource OdinCheck}" Content="Nand Erase"/>
+                                    <CheckBox x:Name="OptRePartition"     Style="{StaticResource OdinCheck}" Content="Re-Partition"/>
+                                    <CheckBox x:Name="OptFResetTime"      Style="{StaticResource OdinCheck}" Content="F. Reset Time"    IsChecked="True"/>
+                                    <CheckBox x:Name="OptDeviceInfo"      Style="{StaticResource OdinCheck}" Content="Device Info"/>
+                                    <CheckBox x:Name="OptFlashLock"       Style="{StaticResource OdinCheck}" Content="Flash Lock"/>
+                                    <CheckBox x:Name="OptDecompressData"  Style="{StaticResource OdinCheck}" Content="Decompress Data"/>
                                     <Separator Margin="0,8,0,8" Background="#33FFFFFF"/>
                                     <TextBlock Text="NOTE" FontSize="10" FontWeight="Bold" Foreground="#FFB830" Margin="0,0,0,4"/>
                                     <TextBlock TextWrapping="Wrap" FontSize="10" Foreground="#8AACCF"
@@ -528,23 +687,23 @@
                     </Border>
                 </Grid>
 
-                <!-- ACTION BAR -->
+                <!-- ═══════════════ ACTION BAR ═══════════════ -->
                 <Grid Grid.Row="3" Margin="4,8,4,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <WrapPanel>
-                        <Button Content="START FLASHING" Width="165" Height="34" Margin="0,0,7,0"
+                        <Button Content="START FLASHING"  Width="165" Height="34" Margin="0,0,7,0"
                                 Background="{DynamicResource SuccessBrush}" BorderBrush="#881CE17A"
                                 Foreground="#EFFFF7" Style="{StaticResource ActionButton}" Click="StartFlashing_Click"/>
-                        <Button Content="WIPE DATA"      Width="112" Height="34" Margin="0,0,7,0"
+                        <Button Content="WIPE DATA"       Width="112" Height="34" Margin="0,0,7,0"
                                 Background="{DynamicResource DangerBrush}" BorderBrush="#88FF4C78"
                                 Foreground="#FFF3F7" Style="{StaticResource ActionButton}" Click="WipeData_Click"/>
-                        <Button Content="REBOOT SYSTEM"  Width="138" Height="34" Margin="0,0,7,0"
+                        <Button Content="REBOOT SYSTEM"   Width="138" Height="34" Margin="0,0,7,0"
                                 Background="#5A27CCFF" BorderBrush="#8827CCFF"
                                 Foreground="#EDFAFF" Style="{StaticResource ActionButton}" Click="RebootSystem_Click"/>
-                        <Button Content="RESET ALL"      Width="105" Height="34"
+                        <Button Content="RESET ALL"       Width="105" Height="34"
                                 Background="#5A2E3340" BorderBrush="#887D8AA4"
                                 Foreground="#E4F0FF" Style="{StaticResource ActionButton}" Click="ResetAll_Click"/>
                     </WrapPanel>
@@ -552,7 +711,7 @@
                               Margin="12,0,0,0" Content="Auto reboot after flash" Foreground="#B7D9F6"/>
                 </Grid>
 
-                <!-- LOG -->
+                <!-- ═══════════════ LOG ═══════════════ -->
                 <Border Grid.Row="4" Margin="4,0,4,2" Style="{StaticResource GlassPanel}">
                     <Grid>
                         <Grid.RowDefinitions>
