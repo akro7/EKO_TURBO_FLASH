@@ -1,35 +1,69 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
+
+    <!-- ── Identity ── -->
+    <AssemblyName>EkoTurboTool</AssemblyName>
+    <RootNamespace>EkoTurboTool</RootNamespace>
+    <Product>EKO TURBO</Product>
+    <Company>EkoTeam — Ahmed Younis</Company>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Copyright>© 2025 Ahmed Younis (AKRO)</Copyright>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+
+    <!-- ── Framework / WPF ── -->
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>EkoTurboTool</AssemblyName>
-    <RootNamespace>EkoTurboTool</RootNamespace>
-    <ApplicationIcon>app.ico</ApplicationIcon>
+
+    <!-- ── UAC manifest (required for ADB USB access) ── -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- ── Publish: single self-contained EXE ── -->
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+
+    <!-- ── Build output cleanup ── -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+
+    <!-- ── Trimming: disabled — WPF reflection breaks with trimming ── -->
+    <PublishTrimmed>false</PublishTrimmed>
+
   </PropertyGroup>
 
-  <!-- NuGet Packages -->
+  <!-- ── NuGet Packages ── -->
   <ItemGroup>
-    <PackageReference Include="SharpZipLib" Version="1.4.2" />
+    <!-- ICSharpCode.SharpZipLib — for tar extraction in BackupService -->
+    <PackageReference Include="SharpZipLib" Version="1.4.2"/>
   </ItemGroup>
 
-  <!-- EKO TURBO -->
+  <!-- ── Copy core tools (adb / fastboot / ekoflash) to output ── -->
   <ItemGroup>
     <None Update="core\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
+  <!-- ── App icon ── -->
   <ItemGroup>
     <None Update="app.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <!-- ── UAC manifest ── -->
+  <ItemGroup>
+    <None Update="app.manifest">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
